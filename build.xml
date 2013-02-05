@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+
+<project name="liferay-nativity-java" basedir="." default="compile">
+
+	<property name="project.dir" value="." />
+	<property name="project.tmp.dir" value="${project.dir}/tmp" />
+	<property name="java.dir" value="${project.dir}/java" />
+
+	<property environment="env" />
+
+	<property file="${project.dir}/build.${user.name}.properties" />
+	<property file="${project.dir}/build.${env.COMPUTERNAME}.properties" />
+	<property file="${project.dir}/build.${env.HOST}.properties" />
+	<property file="${project.dir}/build.${env.HOSTNAME}.properties" />
+	<property file="${project.dir}/build.properties" />
+
+	<path id="portal.classpath">
+	    <pathelement location="${portal.dir}/portal-impl/classes" />
+	    <pathelement location="${portal.dir}/portal-service/classes" />
+	    <pathelement location="${portal.dir}/portal-web/docroot/WEB-INF/classes" />
+	    <pathelement location="${portal.dir}/util-java/classes" />
+	    <fileset dir="${portal.dir}/lib/development" includes="*.jar" />
+	    <fileset dir="${portal.dir}/lib/global" includes="*.jar" />
+	    <fileset dir="${portal.dir}/lib/portal" includes="*.jar" />
+	</path>
+
+	<property file="${project.dir}/tstamp.properties" />
+
+	<condition property="package.name.final" value="${package.name}-${tstamp.value}" else="${package.name}">
+		<istrue value="${package.name.append.date}" />
+	</condition>
+
+	<condition property="package.name.full.final" value="${package.name}-full-${tstamp.value}" else="${package.name}-full">
+		<istrue value="${package.name.append.date}" />
+	</condition>
+
+	<path id="lib.classpath">
+		<fileset dir="${java.dir}/lib" includes="*.jar" />
+	</path>
+
+	<taskdef classpathref="lib.classpath" resource="net/sf/antcontrib/antlib.xml" />
+
+	<target name="build-jar" depends="compile">
+		<delete dir="${project.tmp.dir}/jar" />
+
+		<mkdir dir="${project.tmp.dir}/jar" />
+
+		<jar destfile="${project.tmp.dir}/jar/liferay-nativity.jar">
+			<manifest>
+				<attribute name="Class-Path" value="."/>
+			</manifest>
+
+			<fileset dir="${project.dir}/classes" includes="**/com/liferay/nativity/**" />
+			<fileset file="${project.dir}/classes/nativity-log4j.xml" />
+			<fileset file="${project.dir}/classes/nativity-config.properties" />
+			<zipgroupfileset dir="${java.dir}/lib" excludes="META-INF/*.SF" includes="*.jar" />
+		</jar>
+	</target>
+
+	<target name="build-jni-headers" depends="compile">
+		   <javah destdir="${project.dir}/LiferayNativityShellExtensions/LiferayNativityWindowsUtil" classpath="${java.dir}/classes" class="com.liferay.nativity.util.windows.WindowsUtil"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${project.dir}/classes" />
+		<delete dir="dist" />
+		<delete dir="${project.tmp.dir}" />
+	</target>
+
+	<target name="compile">
+		<antcall target="compile-java">
+			  <param name="javac.classpathref" value="lib.classpath" />
+		      <param name="javac.destdir" value="${java.dir}/classes" />
+		      <param name="javac.srcdir" value="${java.dir}/src" />
+	    </antcall>
+	</target>
+
+	<target name="compile-java">
+		<mkdir dir="${java.dir}/classes" />
+
+		<copy todir="${javac.destdir}">
+			<fileset dir="${javac.srcdir}" excludes="**/*.java" />
+		</copy>
+
+		<javac
+			classpathref="${javac.classpathref}"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="${javac.destdir}"
+			encoding="${javac.encoding}"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="${javac.srcdir}"
+		/>
+
+		<echo file="${javac.destdir}/.touch"></echo>
+	</target>
+
+	<target name="export-win" depends="clean">
+		<property name="target.os" value="windows" />
+
+		<mkdir dir="${project.dir}/dist/" />
+		<mkdir dir="${windows.dir}/installer/tmp" />
+
+		<exec
+			executable="build-nativity-windows-dll.cmd"
+			failonerror="true"
+		>
+			<arg line="${project.dir}" />
+		</exec>
+
+		<copy
+	        file="${project.dir}/LiferayNativityShellExtensions/Release/x64/LiferayNativityWindowsUtil_x64.dll"
+	        toFile="${project.dir}/tmp/LiferayNativityWindowsUtil.dll" failonerror="true"
+	    />
+
+		<copy
+		    file="${project.dir}/LiferaySyncShellExtensions/Release/Win32/LiferayNativityWindowsUtil_x86.dll"
+		    toFile="${project.dir}/tmp/LiferayNativityWindowsUtil_x86.dll" failonerror="true"
+	    />
+
+	    <copy
+	        file="${project.dir}/LiferaySyncShellExtensions/Release/x64/LiferayNativityWindowsUtil_x64.dll"
+	        toFile="${java.dir}/lib/native/LiferayNativityWindowsUtil_x64.dll" failonerror="true"
+	    />
+
+		<copy
+		    file="${project.dir}/LiferaySyncShellExtensions/Release/Win32/LiferayNativityWindowsUtil_x86.dll"
+		    toFile="${project.dir}/lib/native/LiferayNativityWindowsUtil_x86.dll" failonerror="true"
+	    />
+
+       <antcall target="build-jar" />
+
+	</target>
+
+
+	<target name="format-source">
+		<java
+			classname="com.liferay.portal.tools.SourceFormatter"
+			classpathref="portal.classpath"
+			dir="${project.dir}"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Xmx128m" />
+		</java>
+
+		<delete file="ServiceBuilder.temp" />
+	</target>
+
+</project>
