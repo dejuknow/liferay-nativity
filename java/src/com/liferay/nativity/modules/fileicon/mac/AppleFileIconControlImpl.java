@@ -15,10 +15,9 @@
 package com.liferay.nativity.modules.fileicon.mac;
 
 import com.liferay.nativity.Constants;
-import com.liferay.nativity.control.NativityControl;
-import com.liferay.nativity.control.NativityMessage;
 import com.liferay.nativity.modules.fileicon.FileIconControlBase;
-import com.liferay.nativity.modules.fileicon.FileIconControlCallback;
+import com.liferay.nativity.plugincontrol.NativityMessage;
+import com.liferay.nativity.plugincontrol.NativityPluginControl;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -27,16 +26,16 @@ import java.util.Map;
 /**
  * @author Dennis Ju
  */
-public class AppleFileIconControlImpl extends FileIconControlBase {
+public abstract class AppleFileIconControlImpl extends FileIconControlBase {
 
 	/**
-	 * @param nativityControl
+	 * @param pluginControl
 	 */
-	public AppleFileIconControlImpl(
-		NativityControl nativityControl,
-		FileIconControlCallback fileIconControlCallback) {
+	public AppleFileIconControlImpl(NativityPluginControl pluginControl) {
+		super(pluginControl);
 
-		super(nativityControl, fileIconControlCallback);
+		// TODO Auto-generated constructor stub
+
 	}
 
 	@Override
@@ -44,7 +43,7 @@ public class AppleFileIconControlImpl extends FileIconControlBase {
 		NativityMessage message = new NativityMessage(
 			Constants.ENABLE_OVERLAYS, Boolean.FALSE);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
@@ -52,7 +51,7 @@ public class AppleFileIconControlImpl extends FileIconControlBase {
 		NativityMessage message = new NativityMessage(
 			Constants.ENABLE_OVERLAYS, Boolean.TRUE);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
@@ -60,45 +59,47 @@ public class AppleFileIconControlImpl extends FileIconControlBase {
 		NativityMessage message = new NativityMessage(
 			Constants.REGISTER_ICON, path);
 
-		String reply = nativityControl.sendMessage(message);
-
-		if (reply == null) {
-			return -1;
-		}
+		String reply = pluginControl.sendMessage(message);
 
 		return Integer.parseInt(reply);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.liferay.nativity.modules.fileicon.FileIconControlBase#removeAllFileIcons()
+	 */
 	@Override
 	public void removeAllFileIcons() {
+
+		// TODO Auto-generated method stub
+
 	}
 
-	public void removeFileIcon(String path) {
+	public void removeFileIcon(String fileName) {
 		NativityMessage message = new NativityMessage(
-			Constants.REMOVE_FILE_ICONS, new String[] { path });
+			Constants.REMOVE_FILE_ICONS, new String[] { fileName });
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
-	public void removeFileIcons(String[] paths) {
+	public void removeFileIcons(String[] fileNames) {
 		NativityMessage message = new NativityMessage(
-			Constants.REMOVE_FILE_ICONS, paths);
+			Constants.REMOVE_FILE_ICONS, fileNames);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
-	public void setFileIcon(String path, int iconId) {
+	public void setIconForFile(String fileName, int iconId) {
 		Map<String, Integer> map = new HashMap<String, Integer>(1);
 
-		map.put(path, iconId);
+		map.put(fileName, iconId);
 
 		NativityMessage message = new NativityMessage(
 			Constants.SET_FILE_ICONS, map);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
-	public void setFileIcons(Map<String, Integer> fileIconsMap) {
+	public void setIconsForFiles(Map<String, Integer> fileIconsMap) {
 		Map<String, Integer> map = new HashMap<String, Integer>(
 			_messageBufferSize);
 
@@ -113,7 +114,7 @@ public class AppleFileIconControlImpl extends FileIconControlBase {
 				NativityMessage message = new NativityMessage(
 					Constants.SET_FILE_ICONS, map);
 
-				nativityControl.sendMessage(message);
+				pluginControl.sendMessage(message);
 
 				map.clear();
 				i = 0;
@@ -124,8 +125,16 @@ public class AppleFileIconControlImpl extends FileIconControlBase {
 			NativityMessage message = new NativityMessage(
 				Constants.SET_FILE_ICONS, map);
 
-			nativityControl.sendMessage(message);
+			pluginControl.sendMessage(message);
 		}
+	}
+
+	@Override
+	public void setRootFolder(String folder) {
+	}
+
+	@Override
+	public void setSystemFolder(String folder) {
 	}
 
 	@Override
@@ -133,7 +142,7 @@ public class AppleFileIconControlImpl extends FileIconControlBase {
 		NativityMessage message = new NativityMessage(
 			Constants.UNREGISTER_ICON, id);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	private static int _messageBufferSize = 500;

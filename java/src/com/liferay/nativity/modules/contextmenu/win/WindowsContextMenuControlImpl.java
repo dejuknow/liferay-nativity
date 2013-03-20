@@ -15,76 +15,60 @@
 package com.liferay.nativity.modules.contextmenu.win;
 
 import com.liferay.nativity.Constants;
-import com.liferay.nativity.control.MessageListener;
-import com.liferay.nativity.control.NativityControl;
-import com.liferay.nativity.control.NativityMessage;
 import com.liferay.nativity.modules.contextmenu.ContextMenuControlBase;
-import com.liferay.nativity.modules.contextmenu.ContextMenuControlCallback;
+import com.liferay.nativity.plugincontrol.NativityMessage;
+import com.liferay.nativity.plugincontrol.NativityPluginControl;
+import com.liferay.nativity.plugincontrol.mac.MessageListener;
 
 import java.util.List;
 
 /**
  * @author Dennis Ju
  */
-public class WindowsContextMenuControlImpl extends ContextMenuControlBase {
+public abstract class WindowsContextMenuControlImpl
+	extends ContextMenuControlBase {
 
-	public WindowsContextMenuControlImpl(
-		NativityControl nativityControl,
-		ContextMenuControlCallback contextMenuControlCallback) {
+	public WindowsContextMenuControlImpl(NativityPluginControl pluginControl) {
+		super(pluginControl);
 
-		super(nativityControl, contextMenuControlCallback);
-
-		MessageListener getMenuListMessageListener = new MessageListener(
-			Constants.GET_MENU_LIST) {
-
+		MessageListener messageListener = new MessageListener() {
 			@Override
-			public NativityMessage onMessage(NativityMessage message) {
-				@SuppressWarnings("unchecked")
+			public NativityMessage onMessageReceived(NativityMessage message) {
 				List<String> args = (List<String>)message.getValue();
 
-				String[] menuItems = getMenuItems(
-					args.toArray(new String[args.size()]));
+				String command = message.getCommand();
 
-				return new NativityMessage(Constants.GET_MENU_LIST, menuItems);
-			}
-		};
+				if (command.equals(Constants.GET_MENU_LIST)) {
+					String[] menuItems = getMenuItems(
+						args.toArray(new String[args.size()]));
 
-		nativityControl.registerMessageListener(getMenuListMessageListener);
+					return new NativityMessage(
+						Constants.GET_MENU_LIST, menuItems);
+				}
+				else if (command.equals(Constants.GET_HELP_ITEMS)) {
+					String[] helpItems = getHelpItemsForMenus(
+						args.toArray(new String[args.size()]));
 
-		MessageListener getHelpItemsMessageListener = new MessageListener(
-			Constants.GET_HELP_ITEMS) {
+					return new NativityMessage(
+						Constants.GET_HELP_ITEMS, helpItems);
+				}
+				else if (command.equals(Constants.PERFORM_ACTION)) {
+					int index = Integer.valueOf(args.get(0));
 
-			@Override
-			public NativityMessage onMessage(NativityMessage message) {
-				@SuppressWarnings("unchecked")
-				List<String> args = (List<String>)message.getValue();
+					args.remove(0);
 
-				String[] helpItems = getHelpItemsForMenus(
-					args.toArray(new String[args.size()]));
+					//TODO pass title
+					onExecuteMenuItem(
+						index, "", args.toArray(new String[args.size()]));
 
-				return new NativityMessage(Constants.GET_HELP_ITEMS, helpItems);
-			}
-		};
-
-		nativityControl.registerMessageListener(getHelpItemsMessageListener);
-
-		MessageListener performActionMessageListener = new MessageListener(
-			Constants.PERFORM_ACTION) {
-
-			public NativityMessage onMessage(NativityMessage message) {
-				@SuppressWarnings("unchecked")
-				List<String> args = (List<String>)message.getValue();
-
-				String title = args.remove(0);
-
-				fireMenuItemListeners(
-					title, args.toArray(new String[args.size()]));
+					return null;
+				}
 
 				return null;
 			}
 		};
 
-		nativityControl.registerMessageListener(performActionMessageListener);
+		pluginControl.addMessageListener(messageListener);
 	}
 
 	@Override
@@ -92,7 +76,7 @@ public class WindowsContextMenuControlImpl extends ContextMenuControlBase {
 		NativityMessage message = new NativityMessage(
 			Constants.SET_MENU_TITLE, title);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 }

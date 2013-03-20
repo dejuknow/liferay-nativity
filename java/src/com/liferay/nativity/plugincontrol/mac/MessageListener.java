@@ -12,28 +12,16 @@
  * details.
  */
 
-package com.liferay.nativity.modules.contextmenu;
+package com.liferay.nativity.plugincontrol.mac;
 
-import com.liferay.nativity.plugincontrol.NativityPluginControl;
+import com.liferay.nativity.plugincontrol.NativityMessage;
 
 /**
  * @author Dennis Ju
  */
-public abstract class ContextMenuControlBase {
+public abstract class MessageListener {
 
-	public ContextMenuControlBase(NativityPluginControl pluginControl) {
-		this.pluginControl = pluginControl;
-	}
-
-	public abstract String[] getHelpItemsForMenus(String[] paths);
-
-	public abstract String[] getMenuItems(String[] paths);
-
-	public abstract void onExecuteMenuItem(
-		int menuIndex, String menuText, String[] paths);
-
-	public abstract void setContextMenuTitle(String title);
-
-	protected NativityPluginControl pluginControl;
+	public abstract NativityMessage onMessageReceived(
+		NativityMessage nativityMessage);
 
 }

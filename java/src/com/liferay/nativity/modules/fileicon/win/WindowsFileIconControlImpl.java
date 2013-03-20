@@ -15,11 +15,10 @@
 package com.liferay.nativity.modules.fileicon.win;
 
 import com.liferay.nativity.Constants;
-import com.liferay.nativity.control.MessageListener;
-import com.liferay.nativity.control.NativityControl;
-import com.liferay.nativity.control.NativityMessage;
 import com.liferay.nativity.modules.fileicon.FileIconControlBase;
-import com.liferay.nativity.modules.fileicon.FileIconControlCallback;
+import com.liferay.nativity.plugincontrol.NativityMessage;
+import com.liferay.nativity.plugincontrol.NativityPluginControl;
+import com.liferay.nativity.plugincontrol.mac.MessageListener;
 
 import java.util.List;
 import java.util.Map;
@@ -27,36 +26,34 @@ import java.util.Map;
 /**
  * @author Dennis Ju
  */
-public class WindowsFileIconControlImpl extends FileIconControlBase {
+public abstract class WindowsFileIconControlImpl extends FileIconControlBase {
 
-	public WindowsFileIconControlImpl(
-		NativityControl nativityControl,
-		FileIconControlCallback fileIconControlCallback) {
+	public WindowsFileIconControlImpl(NativityPluginControl pluginControl) {
+		super(pluginControl);
 
-		super(nativityControl, fileIconControlCallback);
-
-		MessageListener messageListener = new MessageListener(
-			Constants.GET_FILE_OVERLAY_ID) {
-
+		MessageListener messageListener = new MessageListener() {
 			@Override
-			public NativityMessage onMessage(NativityMessage message) {
-				List<String> args = (List<String>)message.getValue();
+			public NativityMessage onMessageReceived(NativityMessage message) {
+				if (message.getCommand().equals(
+						Constants.GET_FILE_OVERLAY_ID)) {
 
-				if (args.size() > 0) {
-					String arg = args.get(0);
+					List<String> args = (List<String>)message.getValue();
 
-					int icon = getIconForFile(arg);
+					if (args.size() > 0) {
+						String arg1 = args.get(0);
 
-					return new NativityMessage(
-						Constants.GET_FILE_OVERLAY_ID, icon);
+						int icon = getIconForFile(arg1);
+
+						return new NativityMessage(
+							Constants.GET_FILE_OVERLAY_ID, icon);
+					}
 				}
-				else {
-					return null;
-				}
+
+				return null;
 			}
 		};
 
-		nativityControl.registerMessageListener(messageListener);
+		pluginControl.addMessageListener(messageListener);
 	}
 
 	@Override
@@ -64,7 +61,7 @@ public class WindowsFileIconControlImpl extends FileIconControlBase {
 		NativityMessage message = new NativityMessage(
 			Constants.ENABLE_FILE_ICONS, String.valueOf(false));
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
@@ -72,7 +69,7 @@ public class WindowsFileIconControlImpl extends FileIconControlBase {
 		NativityMessage message = new NativityMessage(
 			Constants.ENABLE_FILE_ICONS, String.valueOf(true));
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
@@ -82,43 +79,59 @@ public class WindowsFileIconControlImpl extends FileIconControlBase {
 
 	@Override
 	public void removeAllFileIcons() {
+		//TODO
 	}
 
 	@Override
-	public void removeFileIcon(String path) {
+	public void removeFileIcon(String fileName) {
 		NativityMessage message = new NativityMessage(
-			Constants.CLEAR_FILE_ICON, path);
+			Constants.CLEAR_FILE_ICON, fileName);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
-	public void removeFileIcons(String[] paths) {
+	public void removeFileIcons(String[] fileNames) {
 		NativityMessage message = new NativityMessage(
-			Constants.CLEAR_FILE_ICON, paths);
+			Constants.CLEAR_FILE_ICON, fileNames);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
-	public void setFileIcon(String path, int iconId) {
+	public void setIconForFile(String fileName, int iconId) {
 		NativityMessage message = new NativityMessage(
-			Constants.UPDATE_FILE_ICON, path);
+			Constants.UPDATE_FILE_ICON, fileName);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
-	public void setFileIcons(Map<String, Integer> fileIconsMap) {
+	public void setIconsForFiles(Map<String, Integer> fileIconsMap) {
 		NativityMessage message = new NativityMessage(
 			Constants.UPDATE_FILE_ICON, fileIconsMap.keySet());
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
+	}
+
+	@Override
+	public void setRootFolder(String folder) {
+		NativityMessage message = new NativityMessage(
+			Constants.SET_ROOT_FOLDER, folder);
+
+		pluginControl.sendMessage(message);
+	}
+
+	@Override
+	public void setSystemFolder(String folder) {
+		NativityMessage message = new NativityMessage(
+			Constants.SET_SYSTEM_FOLDER, folder);
+
+		pluginControl.sendMessage(message);
 	}
 
 	@Override
 	public void unregisterIcon(int id) {
-		return;
 	}
 
 }

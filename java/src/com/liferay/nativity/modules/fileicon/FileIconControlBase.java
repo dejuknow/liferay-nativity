@@ -14,27 +14,43 @@
 
 package com.liferay.nativity.modules.fileicon;
 
-import com.liferay.nativity.control.NativityControl;
+import com.liferay.nativity.plugincontrol.NativityPluginControl;
+
+import java.util.Map;
 
 /**
- * @author Michael Young
+ * @author Dennis Ju
  */
-public abstract class FileIconControlBase implements FileIconControl {
+public abstract class FileIconControlBase {
 
-	public FileIconControlBase(
-		NativityControl nativityControl,
-		FileIconControlCallback fileIconControlCallback) {
-
-		this.nativityControl = nativityControl;
-		this.fileIconControlCallback = fileIconControlCallback;
+	public FileIconControlBase(NativityPluginControl pluginControl) {
+		this.pluginControl = pluginControl;
 	}
 
-	@Override
-	public int getIconForFile(String path) {
-		return fileIconControlCallback.getIconForFile(path);
-	}
+	public abstract void disableFileIcons();
 
-	protected FileIconControlCallback fileIconControlCallback;
-	protected NativityControl nativityControl;
+	public abstract void enableFileIcons();
+
+	public abstract int getIconForFile(String path);
+
+	public abstract int registerIcon(String path);
+
+	public abstract void removeAllFileIcons();
+
+	public abstract void removeFileIcon(String fileName);
+
+	public abstract void removeFileIcons(String[] fileNames);
+
+	public abstract void setIconForFile(String fileName, int iconId);
+
+	public abstract void setIconsForFiles(Map<String, Integer> fileIconsMap);
+
+	public abstract void setRootFolder(String folder);
+
+	public abstract void setSystemFolder(String folder);
+
+	public abstract void unregisterIcon(int id);
+
+	protected NativityPluginControl pluginControl;
 
 }

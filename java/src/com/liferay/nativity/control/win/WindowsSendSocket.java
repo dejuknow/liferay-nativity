@@ -18,6 +18,10 @@ import com.liferay.nativity.control.NativityMessage;
 
 import flexjson.JSONSerializer;
 
+import com.liferay.nativity.plugincontrol.NativityMessage;
+
+import flexjson.JSONSerializer;
+
 import java.io.IOException;
 
 import java.net.Socket;

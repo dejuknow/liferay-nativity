@@ -15,72 +15,71 @@
 package com.liferay.nativity.modules.contextmenu.mac;
 
 import com.liferay.nativity.Constants;
-import com.liferay.nativity.control.MessageListener;
-import com.liferay.nativity.control.NativityControl;
-import com.liferay.nativity.control.NativityMessage;
 import com.liferay.nativity.modules.contextmenu.ContextMenuControlBase;
-import com.liferay.nativity.modules.contextmenu.ContextMenuControlCallback;
+import com.liferay.nativity.plugincontrol.NativityMessage;
+import com.liferay.nativity.plugincontrol.NativityPluginControl;
+import com.liferay.nativity.plugincontrol.mac.MessageListener;
+
+import flexjson.JSONSerializer;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dennis Ju
  */
-public class AppleContextMenuControlImpl extends ContextMenuControlBase {
+public abstract class AppleContextMenuControlImpl
+	extends ContextMenuControlBase {
 
-	public AppleContextMenuControlImpl(
-		NativityControl nativityControl,
-		ContextMenuControlCallback contextMenuControlCallback) {
+	public AppleContextMenuControlImpl(NativityPluginControl pluginControl) {
+		super(pluginControl);
 
-		super(nativityControl, contextMenuControlCallback);
-
-		MessageListener menuQueryMessageListener = new MessageListener(
-			Constants.MENU_QUERY) {
-
+		MessageListener messageListener = new MessageListener() {
 			@Override
-			public NativityMessage onMessage(NativityMessage message) {
-				_currentFiles = (List<String>)message.getValue();
+			public NativityMessage onMessageReceived(NativityMessage message) {
+				String command = message.getCommand();
 
-				String[] currentFilesArray =
-					(String[])_currentFiles.toArray(
-						new String[_currentFiles.size()]);
+				if (command.equals(Constants.MENU_QUERY)) {
+					_currentFiles = (List<String>)message.getValue();
 
-				String[] items = getMenuItems(currentFilesArray);
+					String[] currentFilesArray =
+						(String[])_currentFiles.toArray(
+							new String[_currentFiles.size()]);
 
-				return new NativityMessage(Constants.MENU_ITEMS, items);
-			}
-		};
+					String[] items = getMenuItems(currentFilesArray);
 
-		nativityControl.registerMessageListener(menuQueryMessageListener);
+					return new NativityMessage(Constants.MENU_ITEMS, items);
+				}
+				else if (command.equals(Constants.MENU_EXEC)) {
+					Map<String, Object> args =
+						(Map<String, Object>)message.getValue();
 
-		MessageListener menuExecMessageListener = new MessageListener(
-			Constants.MENU_EXEC) {
+					int menuIndex = (Integer)args.get(Constants.MENU_INDEX);
+					String menuText = (String)args.get(Constants.MENU_TEXT);
 
-			@Override
-			public NativityMessage onMessage(NativityMessage message) {
-				String menuText = (String)message.getValue();
+					String[] currentFiles =
+						(String[])_currentFiles.toArray(
+							new String[_currentFiles.size()]);
 
-				String[] currentFiles =
-					(String[])_currentFiles.toArray(
-						new String[_currentFiles.size()]);
-
-				fireMenuItemListeners(menuText, currentFiles);
+					onExecuteMenuItem(menuIndex, menuText, currentFiles);
+				}
 
 				return null;
 			}
 		};
 
-		nativityControl.registerMessageListener(menuExecMessageListener);
+		pluginControl.addMessageListener(messageListener);
 	}
 
 	@Override
-	public void setContextMenuTitle(String title) {
+	public final void setContextMenuTitle(String title) {
 		NativityMessage message = new NativityMessage(
 			Constants.SET_MENU_TITLE, title);
 
-		nativityControl.sendMessage(message);
+		pluginControl.sendMessage(message);
 	}
 
+	private static JSONSerializer _jsonSerializer = new JSONSerializer();
 	private List<String> _currentFiles;
 
 }

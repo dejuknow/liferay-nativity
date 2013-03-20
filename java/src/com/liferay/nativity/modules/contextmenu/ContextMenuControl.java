@@ -14,50 +14,122 @@
 
 package com.liferay.nativity.modules.contextmenu;
 
-import com.liferay.nativity.modules.contextmenu.listeners.MenuItemListener;
+import com.liferay.nativity.Constants;
+import com.liferay.nativity.modules.contextmenu.mac.AppleContextMenuControlImpl;
+import com.liferay.nativity.modules.contextmenu.win.WindowsContextMenuControlImpl;
+import com.liferay.nativity.plugincontrol.NativityMessage;
+import com.liferay.nativity.plugincontrol.NativityPluginControl;
+import com.liferay.util.OSDetector;
 
 /**
  * @author Dennis Ju
  */
-public interface ContextMenuControl extends ContextMenuControlCallback {
+public abstract class ContextMenuControl extends ContextMenuControlBase {
+
+	public ContextMenuControl(NativityPluginControl pluginControl) {
+		super(pluginControl);
+
+		if (_contextMenuControlBaseDelegate == null) {
+			if (OSDetector.isApple()) {
+				_contextMenuControlBaseDelegate =
+					createAppleContextMenuControlBase();
+			}
+			else if (OSDetector.isWindows()) {
+				_contextMenuControlBaseDelegate =
+					createWindowsContextMenuControlBase();
+			}
+		}
+	}
 
 	/**
-	 * Adds a MenuItemListener to respond to menu item selections.
-	 * Multiple listeners can be added.
+	 * Set the listener that triggers when a context menu opens
 	 *
-	 * @param listener to respond to menu item selections
+	 * @param a
+	 *            MenuItemListener
 	 */
-	public void addMenuItemListener(MenuItemListener menuItemListener);
 
-	/**
-	 * Notifies all MenuItemListener instances when a menu item is selected
-	 *
-	 * @param index value of the selected menu item
-	 *
-	 * @param text value of the selected menu item
-	 *
-	 * @param array of selected file paths
-	 */
-	public void fireMenuItemListeners(String menuText, String[] paths);
+	public abstract void fireMenuItemExecuted(int index, String[] paths);
 
-	/**
-	 * Removes all MenuItemListeners
-	 */
-	public void removeAllMenuItemListeners();
+	public abstract String[] getHelpItemsForMenus(String[] files);
 
-	/**
-	 * Removes a MenuItemListener
-	 *
-	 * @param the MenuItemListener to remove
-	 */
-	public void removeMenuItemListener(MenuItemListener menuItemListener);
+	public abstract String[] getMenuItems(String[] paths);
+
+	// Windows
+
+	public abstract void onExecuteMenuItem(
+		int menuIndex, String menuText, String[] paths);
 
 	/**
 	 * Set title of root context menu item, all other items will be added as
 	 * children of it
 	 *
-	 * @param title of context menu
+	 * @param new title of item
 	 */
-	public void setContextMenuTitle(String title);
+	public void setContextMenuTitle(String title) {
+		NativityMessage message = new NativityMessage(
+			Constants.SET_MENU_TITLE, title);
+
+		pluginControl.sendMessage(message);
+	}
+
+	/**
+	 * @return
+	 */
+	protected ContextMenuControlBase createAppleContextMenuControlBase() {
+		return new AppleContextMenuControlImpl(pluginControl) {
+
+			@Override
+			public String[] getMenuItems(String[] paths) {
+
+				// TODO Auto-generated method stub
+
+				return ContextMenuControl.this.getMenuItems(paths);
+			}
+
+			@Override
+			public void onExecuteMenuItem(
+				int menuIndex, String menuText, String[] paths) {
+
+				// TODO Auto-generated method stub
+
+				ContextMenuControl.this.onExecuteMenuItem(
+					menuIndex, menuText, paths);
+			}
+
+			@Override
+			public String[] getHelpItemsForMenus(String[] paths) {
+				return ContextMenuControl.this.getMenuItems(paths);
+			}
+		};
+	}
+
+	/**
+	 * @return
+	 */
+	protected ContextMenuControlBase createWindowsContextMenuControlBase() {
+		return new WindowsContextMenuControlImpl(pluginControl) {
+
+			@Override
+			public String[] getMenuItems(String[] paths) {
+
+				return ContextMenuControl.this.getMenuItems(paths);
+			}
+
+			@Override
+			public void onExecuteMenuItem(
+				int menuIndex, String menuText, String[] paths) {
+
+				ContextMenuControl.this.onExecuteMenuItem(
+					menuIndex, menuText, paths);
+			}
+
+			@Override
+			public String[] getHelpItemsForMenus(String[] paths) {
+				return ContextMenuControl.this.getMenuItems(paths);
+			}
+		};
+	}
+
+	private ContextMenuControlBase _contextMenuControlBaseDelegate;
 
 }

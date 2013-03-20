@@ -12,28 +12,40 @@
  * details.
  */
 
-package com.liferay.nativity.modules.contextmenu;
-
-import com.liferay.nativity.plugincontrol.NativityPluginControl;
+package com.liferay.nativity.plugincontrol;
 
 /**
  * @author Dennis Ju
  */
-public abstract class ContextMenuControlBase {
+public class NativityMessage {
 
-	public ContextMenuControlBase(NativityPluginControl pluginControl) {
-		this.pluginControl = pluginControl;
+	public NativityMessage(String command, Object value) {
+		_command = command;
+		_value = value;
 	}
 
-	public abstract String[] getHelpItemsForMenus(String[] paths);
+	public String getCommand() {
+		return _command;
+	}
 
-	public abstract String[] getMenuItems(String[] paths);
+	public Object getValue() {
+		return _value;
+	}
 
-	public abstract void onExecuteMenuItem(
-		int menuIndex, String menuText, String[] paths);
+	public void setCommand(String command) {
+		_command = command;
+	}
 
-	public abstract void setContextMenuTitle(String title);
+	public void setValue(Object value) {
+		_value = value;
+	}
 
-	protected NativityPluginControl pluginControl;
+	// Parameterless constructor needed for flexjson
+
+	protected NativityMessage() {
+	}
+
+	private String _command;
+	private Object _value;
 
 }
