@@ -38,6 +38,7 @@ public abstract class WindowsContextMenuControlImpl
 
 			@Override
 			public NativityMessage onMessageReceived(NativityMessage message) {
+				@SuppressWarnings("unchecked")
 				List<String> args = (List<String>)message.getValue();
 
 				String[] menuItems = getMenuItems(
@@ -54,6 +55,7 @@ public abstract class WindowsContextMenuControlImpl
 
 			@Override
 			public NativityMessage onMessageReceived(NativityMessage message) {
+				@SuppressWarnings("unchecked")
 				List<String> args = (List<String>)message.getValue();
 
 				String[] helpItems = getHelpItemsForMenus(
@@ -68,8 +70,8 @@ public abstract class WindowsContextMenuControlImpl
 		MessageListener performActionMessageListener = new MessageListener(
 			Constants.PERFORM_ACTION) {
 
-			@Override
 			public NativityMessage onMessageReceived(NativityMessage message) {
+				@SuppressWarnings("unchecked")
 				List<String> args = (List<String>)message.getValue();
 
 				int index = Integer.valueOf(args.get(0));
@@ -87,23 +89,6 @@ public abstract class WindowsContextMenuControlImpl
 		pluginControl.registerMessageListener(performActionMessageListener);
 	}
 	
-	@Override
-	public void addMenuItemListener(MenuItemListener listen) {
-		_listeners.add(listen);
-	}
-
-	@Override
-	public void onExecuteMenuItem(int menuIndex, String menuText, String[] paths) {
-		for(MenuItemListener listen : _listeners) {
-			listen.menuItemExecuted(menuIndex, menuText, paths);
-		}
-	}
-
-	@Override
-	public void removeMenuItemListener(MenuItemListener listen) {
-		_listeners.remove(listen);
-	}
-
 	@Override
 	public void setContextMenuTitle(String title) {
 		NativityMessage message = new NativityMessage(

@@ -30,8 +30,8 @@ public:
 	static bool ProcessMessage(std::wstring*, std::map<std::wstring*, std::vector<std::wstring*>*>*);
 	static bool ProcessResponse(const std::wstring*, std::vector<std::wstring*>*);
 
-	static bool CreateMessage(const std::wstring*,std::vector<std::wstring*>*, std::wstring*);
-	static bool FormListAsResponse(std::vector<std::wstring*>*, std::wstring*);
+	static bool CreateMessage(const wchar_t*,std::vector<std::wstring>*, std::wstring*);
+	static bool FormListAsResponse(std::vector<std::wstring>*, std::wstring*);
 
 private:
 	static bool ParseArgs(std::wstring*, std::vector<std::wstring*>*);

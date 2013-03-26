@@ -15,7 +15,6 @@
 package com.liferay.nativity.plugincontrol.win;
 
 import com.liferay.nativity.plugincontrol.NativityMessage;
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
@@ -98,12 +97,15 @@ public class MessageProcessor implements Runnable {
 				message);
 
 			if (responseMessage == null) {
+				_logger.debug("Response Null");
 				_returnEmpty();
 			}
 			else {
 				String response =
 					_jsonSerializer.exclude("*.class")
 						.deepSerialize(responseMessage);
+				
+				_logger.debug("Response {}",response);
 
 				_outputStreamWriter.write(response);
 				_outputStreamWriter.write("\0");

@@ -54,7 +54,7 @@ public class TestDriver {
 		message.setValue(items);
 		
 		JSONSerializer serializer = new JSONSerializer();
-		_logger.debug(serializer.deepSerialize(message));;
+		_logger.debug(serializer.deepSerialize(message));
 
 		_logger.debug("main");
 		
@@ -82,10 +82,10 @@ public class TestDriver {
 				_setMenuTitle(contextMenuControl);
 
 				_logger.debug("_setRootFolder");
-				_setRootFolder(fileIconControl);
+				_setRootFolder(nativityControl);
 
 				_logger.debug("_setSystemFolder");
-				_setSystemFolder(fileIconControl);
+				_setSystemFolder(nativityControl);
 
 				_logger.debug("_updateFileIcon");
 				_updateFileIcon(fileIconControl);
@@ -171,8 +171,8 @@ public class TestDriver {
 		}
 	}
 
-	private static void _setRootFolder(FileIconControlBase fileIconControl) {
-		fileIconControl.setRootFolder("C:/Users/liferay/Documents/liferay-sync");
+	private static void _setRootFolder(WindowsNativityPluginControlImpl nativityControl) {
+		nativityControl.setRootFolder("C:/Users/liferay/Documents/liferay-sync");
 
 		try {
 			Thread.sleep(_waitTime);
@@ -182,8 +182,8 @@ public class TestDriver {
 		}
 	}
 
-	private static void _setSystemFolder(FileIconControlBase fileIconControl) {
-		fileIconControl.setSystemFolder("C:/Users/liferay/Documents/liferay-sync");
+	private static void _setSystemFolder(WindowsNativityPluginControlImpl nativityControl) {
+		nativityControl.setSystemFolder("C:/Users/liferay/Documents/liferay-sync");
 
 		try {
 			Thread.sleep(_waitTime);

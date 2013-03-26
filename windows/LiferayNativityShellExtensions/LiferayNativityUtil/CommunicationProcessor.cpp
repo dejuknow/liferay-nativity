@@ -59,15 +59,16 @@ bool CommunicationProcessor::ProcessMessage(wstring* message, map<wstring*,vecto
 
 bool CommunicationProcessor::ProcessResponse(const wstring* message, std::vector<std::wstring*>* responseList)
 {
-		//{"response":"blah"}
-		//{"response":["blah","blah","blah"]}
+		//{"command":"getFileOverlayId","value":1}
+		//{"command":"getMenuItems","value":["blah","blah","blah"]}
 
 		if(message->length() == 0)
 		{
 			return false;
 		}
 	
-		size_t colon = message->find(COLON);
+		size_t firstComma = message->find(COMMA);
+		size_t colon = message->find(COLON, firstComma);
 		size_t end = message->find(CLOSE_CURLY_BRACE);
 
 		if(colon == string::npos || end == string::npos)
@@ -251,7 +252,7 @@ bool CommunicationProcessor::RemoveQuotes(wstring* message)
 	return true;
 }
 
-bool CommunicationProcessor::CreateMessage(const wstring* command, vector<wstring*>* args, wstring* message)
+bool CommunicationProcessor::CreateMessage(const wchar_t* command, vector<wstring>* args, wstring* message)
 {
 	message->append(OPEN_CURLY_BRACE);
 	message->append(QUOTE);
@@ -259,7 +260,7 @@ bool CommunicationProcessor::CreateMessage(const wstring* command, vector<wstrin
 	message->append(QUOTE);
 	message->append(COLON);
 	message->append(QUOTE);
-	message->append(*command);
+	message->append(command);
 	message->append(QUOTE);
 	message->append(COMMA);
 
@@ -280,21 +281,22 @@ bool CommunicationProcessor::CreateMessage(const wstring* command, vector<wstrin
 	return true;
 }
 
-bool CommunicationProcessor::FormListAsResponse(std::vector<std::wstring*>* args, std::wstring* message)
+bool CommunicationProcessor::FormListAsResponse(std::vector<std::wstring>* args, std::wstring* message)
 {
 	int i = 0;
-	for(vector<wstring*>::iterator it = args->begin() ; it != args->end(); it++)
+	for(vector<wstring>::iterator it = args->begin() ; it != args->end(); it++)
 	{
 		if(i > 0)
 		{
 			message->append(COMMA);
 		}
 
-		wstring* temp = *it;
+		wstring temp = *it;
 
 		message->append(QUOTE);
-		message->append(temp->c_str());
+		message->append(temp.c_str());
 		message->append(QUOTE);
+		i++;
 	}
 
 	return true;

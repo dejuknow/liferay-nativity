@@ -51,7 +51,7 @@ private:
 	
 	bool _GetHelpText(void);
 
-	bool _GenerateMessage(const wchar_t* , int cmdIndex, std::wstring*);
+	//bool _GenerateMessage(const wchar_t* , int cmdIndex, std::wstring*);
 	
 	CommunicationSocket* _communicationSocket;
 	

@@ -41,7 +41,7 @@ protected:
     ~LiferayNativityOverlay(void);
 
 private:
-	bool _GenerateMessage(const wchar_t*, std::wstring*);
+	//bool _GenerateMessage(const wchar_t*, std::wstring*);
 
 	bool _IsOverlaysEnabled();
 
