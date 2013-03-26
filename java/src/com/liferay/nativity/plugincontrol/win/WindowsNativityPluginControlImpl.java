@@ -17,7 +17,6 @@ package com.liferay.nativity.plugincontrol.win;
 import com.liferay.nativity.Constants;
 import com.liferay.nativity.plugincontrol.NativityMessage;
 import com.liferay.nativity.plugincontrol.NativityPluginControl;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,11 +29,11 @@ import org.slf4j.LoggerFactory;
 public class WindowsNativityPluginControlImpl extends NativityPluginControl {
 
 	@Override
-	public void connect() throws PluginException {
+	public void connect()  {
 		_logger.debug("Connecting...");
 
 		if (running()) {
-			throw new PluginException(PluginException.ALREADY_CONNECTED);
+			return;
 		}
 
 		_receive = new WindowsReceiveSocket(this);
@@ -61,6 +60,9 @@ public class WindowsNativityPluginControlImpl extends NativityPluginControl {
 		return "";
 	}
 
+	/*
+	 * Not used for Windows
+	 */
 	@Override
 	public void setRootFolder(String folder) {
 		NativityMessage message = new NativityMessage(
@@ -79,8 +81,6 @@ public class WindowsNativityPluginControlImpl extends NativityPluginControl {
 
 	@Override
 	public boolean startPlugin(String path) throws Exception {
-
-		// TODO Auto-generated method stub
 
 		return false;
 	}

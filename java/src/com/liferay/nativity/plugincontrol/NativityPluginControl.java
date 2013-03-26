@@ -17,7 +17,6 @@ package com.liferay.nativity.plugincontrol;
 import com.liferay.nativity.modules.contextmenu.ContextMenuControl;
 import com.liferay.nativity.modules.fileicon.FileIconControl;
 import com.liferay.nativity.plugincontrol.mac.MessageListener;
-import com.liferay.nativity.plugincontrol.win.PluginException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +30,7 @@ public abstract class NativityPluginControl {
 		_commandMap = new HashMap<String, MessageListener>();
 	}
 
-	public abstract void connect() throws PluginException;
+	public abstract void connect();
 
 	public abstract void disconnect();
 
