@@ -18,6 +18,7 @@ import com.liferay.nativity.Constants;
 import com.liferay.nativity.modules.contextmenu.listeners.ExecuteMenuItemListener;
 import com.liferay.nativity.modules.contextmenu.mac.AppleContextMenuControlImpl;
 import com.liferay.nativity.modules.contextmenu.win.WindowsContextMenuControlImpl;
+import com.liferay.nativity.plugincontrol.MenuItemListener;
 import com.liferay.nativity.plugincontrol.NativityMessage;
 import com.liferay.nativity.plugincontrol.NativityPluginControl;
 import com.liferay.util.OSDetector;
@@ -100,6 +101,18 @@ public abstract class ContextMenuControl {
 			public String[] getHelpItemsForMenus(String[] paths) {
 				return ContextMenuControl.this.getMenuItems(paths);
 			}
+
+			@Override
+			public void addMenuItemListener(MenuItemListener listen) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void removeMenuItemListener(MenuItemListener listen) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 
@@ -118,6 +131,18 @@ public abstract class ContextMenuControl {
 			@Override
 			public String[] getHelpItemsForMenus(String[] paths) {
 				return ContextMenuControl.this.getMenuItems(paths);
+			}
+
+			@Override
+			public void addMenuItemListener(MenuItemListener listen) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void removeMenuItemListener(MenuItemListener listen) {
+				// TODO Auto-generated method stub
+				
 			}
 		};
 	}

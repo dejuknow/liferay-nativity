@@ -14,6 +14,7 @@
 package com.liferay.nativity.test;
 
 import com.liferay.nativity.modules.contextmenu.win.WindowsContextMenuControlImpl;
+import com.liferay.nativity.plugincontrol.MenuItemListener;
 import com.liferay.nativity.plugincontrol.NativityPluginControl;
 
 import java.util.ArrayList;
@@ -77,5 +78,23 @@ public class TestContextMenuControl extends WindowsContextMenuControlImpl{
 		TestContextMenuControl.class.getName());
 
 	private Random _random;
+
+	/* (non-Javadoc)
+	 * @see com.liferay.nativity.modules.contextmenu.ContextMenuControlBase#addMenuItemListener(com.liferay.nativity.plugincontrol.MenuItemListener)
+	 */
+	@Override
+	public void addMenuItemListener(MenuItemListener listen) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.liferay.nativity.modules.contextmenu.ContextMenuControlBase#removeMenuItemListener(com.liferay.nativity.plugincontrol.MenuItemListener)
+	 */
+	@Override
+	public void removeMenuItemListener(MenuItemListener listen) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

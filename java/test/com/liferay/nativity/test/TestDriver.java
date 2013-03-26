@@ -16,14 +16,19 @@ package com.liferay.nativity.test;
 
 import com.liferay.nativity.modules.contextmenu.ContextMenuControlBase;
 import com.liferay.nativity.modules.fileicon.FileIconControlBase;
+import com.liferay.nativity.plugincontrol.NativityMessage;
 import com.liferay.nativity.plugincontrol.win.WindowsNativityPluginControlImpl;
+
+import flexjson.JSONSerializer;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.xml.DOMConfigurator;
@@ -41,6 +46,15 @@ public class TestDriver {
 	 */
 	public static void main(String[] args) {
 		_intitializeLogging();
+		
+		NativityMessage message =  new NativityMessage();
+		message.setCommand("BLAH");
+		List<String> items = new ArrayList<String>();
+		items.add("ONE");
+		message.setValue(items);
+		
+		JSONSerializer serializer = new JSONSerializer();
+		_logger.debug(serializer.deepSerialize(message));;
 
 		_logger.debug("main");
 		

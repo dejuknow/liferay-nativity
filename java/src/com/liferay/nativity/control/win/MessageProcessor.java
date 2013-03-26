@@ -15,7 +15,7 @@
 package com.liferay.nativity.plugincontrol.win;
 
 import com.liferay.nativity.plugincontrol.NativityMessage;
-import com.liferay.nativity.plugincontrol.mac.MessageListener;
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
@@ -27,6 +27,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,17 +85,15 @@ public class MessageProcessor implements Runnable {
 	private void _handle(String receivedMessage) throws IOException {
 		_logger.debug("Message {}", receivedMessage);
 
-		if (_messageListener == null) {
-			return;
-		}
-
 		JSONDeserializer<NativityMessage> jsonDeserializer =
 			new JSONDeserializer<NativityMessage>();
+		
+		jsonDeserializer.use("value", ArrayList.class);
 
 		try {
 			NativityMessage message = jsonDeserializer.deserialize(
 				receivedMessage, NativityMessage.class);
-
+			
 			NativityMessage responseMessage = _plugIn.fireMessageListener(
 				message);
 
@@ -152,7 +151,6 @@ public class MessageProcessor implements Runnable {
 
 	private Socket _clientSocket;
 	private InputStreamReader _inputStreamReader;
-	private MessageListener _messageListener;
 	private OutputStreamWriter _outputStreamWriter;
 	private WindowsNativityPluginControlImpl _plugIn;
 

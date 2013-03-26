@@ -16,10 +16,12 @@ package com.liferay.nativity.modules.contextmenu.win;
 
 import com.liferay.nativity.Constants;
 import com.liferay.nativity.modules.contextmenu.ContextMenuControlBase;
+import com.liferay.nativity.plugincontrol.MenuItemListener;
+import com.liferay.nativity.plugincontrol.MessageListener;
 import com.liferay.nativity.plugincontrol.NativityMessage;
 import com.liferay.nativity.plugincontrol.NativityPluginControl;
-import com.liferay.nativity.plugincontrol.mac.MessageListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -84,6 +86,23 @@ public abstract class WindowsContextMenuControlImpl
 
 		pluginControl.registerMessageListener(performActionMessageListener);
 	}
+	
+	@Override
+	public void addMenuItemListener(MenuItemListener listen) {
+		_listeners.add(listen);
+	}
+
+	@Override
+	public void onExecuteMenuItem(int menuIndex, String menuText, String[] paths) {
+		for(MenuItemListener listen : _listeners) {
+			listen.menuItemExecuted(menuIndex, menuText, paths);
+		}
+	}
+
+	@Override
+	public void removeMenuItemListener(MenuItemListener listen) {
+		_listeners.remove(listen);
+	}
 
 	@Override
 	public void setContextMenuTitle(String title) {
@@ -92,5 +111,7 @@ public abstract class WindowsContextMenuControlImpl
 
 		pluginControl.sendMessage(message);
 	}
+	
+	List<MenuItemListener> _listeners = new ArrayList<MenuItemListener>();
 
 }

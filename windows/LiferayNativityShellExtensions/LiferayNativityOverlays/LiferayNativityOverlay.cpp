@@ -105,16 +105,26 @@ IFACEMETHODIMP LiferayNativityOverlay::GetPriority(int *pPriority)
 
 IFACEMETHODIMP LiferayNativityOverlay::GetOverlayInfo(PWSTR pwszIconFile, int cchMax, int *pIndex, DWORD *pdwFlags)
 {
+	wofstream myfile;
+	myfile.open ("d:/LiferayNativityOverlayGetOverlayInfo.txt", ios::app);
+	myfile<<"Starting to get overlay info"<<endl;
+
 	*pIndex = 0;
 
 	*pdwFlags = ISIOI_ICONFILE | ISIOI_ICONINDEX;
 
 	if (GetModuleFileName(instanceHandle, pwszIconFile, cchMax) == 0)
 	{	
+		myfile<<"Unable to get module name "<<endl;
+		myfile.close();
+
 		HRESULT hResult = HRESULT_FROM_WIN32(GetLastError());
 
 		return hResult;
 	}
+
+	myfile<<"Got module name "<<pwszIconFile<<endl;
+	myfile.close();
 
 	return S_OK;
 }
@@ -165,10 +175,7 @@ bool LiferayNativityOverlay::_IsMonitoredFileState(const wchar_t* filePath)
 
 	wstring* message = new wstring();
 
-	vector<wstring>* file = new vector<wstring>();
-	file->push_back(filePath);
-
-	if(!CommunicationProcessor::CreateMessage(GET_FILE_OVERLAY_ID, file, message))
+	if(!_GenerateMessage(filePath, message))
 	{
 		delete message;
 
@@ -204,11 +211,10 @@ bool LiferayNativityOverlay::_IsMonitoredFileState(const wchar_t* filePath)
 
 		return false;
 	}
-
+			
 	wstring* idString = responseMessage->at(0);
 
 	int state = _wtoi(idString->c_str());
-
 	if(state == OVERLAY_ID)
 	{
 		needed = true;
@@ -220,3 +226,34 @@ bool LiferayNativityOverlay::_IsMonitoredFileState(const wchar_t* filePath)
 
 	return needed;
 }
+
+bool LiferayNativityOverlay::_GenerateMessage(const wchar_t* file,  wstring* message)
+{
+	//{cmd:1,values:["args","arg2","arg3"]}
+	message->append(OPEN_CURLY_BRACE);
+	message->append(QUOTE);
+	message->append(COMMAND);
+	message->append(QUOTE);
+	message->append(COLON);
+
+	message->append(QUOTE);
+	message->append(GET_FILE_OVERLAY_ID);
+	message->append(QUOTE);
+
+	message->append(COMMA);
+	message->append(QUOTE);
+	message->append(VALUES);
+	message->append(QUOTE);
+	message->append(COLON);
+	message->append(OPEN_BRACE);
+
+	message->append(QUOTE);
+	message->append(file);
+	message->append(QUOTE);
+
+	message->append(CLOSE_BRACE);
+	message->append(CLOSE_CURLY_BRACE);
+
+	return true;
+}
+

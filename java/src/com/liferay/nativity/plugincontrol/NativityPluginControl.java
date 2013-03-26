@@ -16,7 +16,6 @@ package com.liferay.nativity.plugincontrol;
 
 import com.liferay.nativity.modules.contextmenu.ContextMenuControl;
 import com.liferay.nativity.modules.fileicon.FileIconControl;
-import com.liferay.nativity.plugincontrol.mac.MessageListener;
 
 import java.util.HashMap;
 import java.util.Map;
