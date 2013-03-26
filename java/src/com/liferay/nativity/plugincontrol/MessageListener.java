@@ -12,9 +12,8 @@
  * details.
  */
 
-package com.liferay.nativity.plugincontrol.mac;
+package com.liferay.nativity.plugincontrol;
 
-import com.liferay.nativity.plugincontrol.NativityMessage;
 
 
 /**

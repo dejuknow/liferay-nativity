@@ -264,7 +264,7 @@ bool CommunicationProcessor::CreateMessage(const wstring* command, vector<wstrin
 	message->append(COMMA);
 
 	message->append(QUOTE);
-	message->append(ARGS);
+	message->append(VALUES);
 	message->append(QUOTE);
 	message->append(COLON);
 	message->append(OPEN_BRACE);

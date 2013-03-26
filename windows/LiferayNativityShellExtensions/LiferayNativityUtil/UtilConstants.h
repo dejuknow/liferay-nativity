@@ -14,7 +14,6 @@
 
 #define PLUG_IN_SOCKET_ADDRESS			"127.0.0.1"
 
-#define ARGS							L"args"
 #define CLOSE_BRACE						L"]"
 #define CLOSE_CURLY_BRACE				L"}"
 #define COLON							L":"
@@ -23,6 +22,7 @@
 #define OPEN_BRACE						L"["
 #define OPEN_CURLY_BRACE				L"{"
 #define QUOTE							L"\""
+#define VALUES							L"value"
 
 //Registry values for running
 #define REGISTRY_ROOT_KEY			    L"SOFTWARE\\Liferay Inc\\Liferay Nativity"

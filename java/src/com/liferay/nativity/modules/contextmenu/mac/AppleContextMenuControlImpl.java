@@ -16,9 +16,9 @@ package com.liferay.nativity.modules.contextmenu.mac;
 
 import com.liferay.nativity.Constants;
 import com.liferay.nativity.modules.contextmenu.ContextMenuControlBase;
+import com.liferay.nativity.plugincontrol.MessageListener;
 import com.liferay.nativity.plugincontrol.NativityMessage;
 import com.liferay.nativity.plugincontrol.NativityPluginControl;
-import com.liferay.nativity.plugincontrol.mac.MessageListener;
 
 import java.util.List;
 import java.util.Map;

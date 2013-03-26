@@ -250,7 +250,7 @@ bool ContextMenuUtil::_GetHelpText(void)
 
 bool ContextMenuUtil::_GenerateMessage(const wchar_t* command, int cmdIndex, wstring* message)
 {
-	//{cmd:1,args:["args","arg2","arg3"]}
+	//{cmd:1,value:["args","arg2","arg3"]}
 	message->append(OPEN_CURLY_BRACE);
 	message->append(QUOTE);
 	message->append(COMMAND);
@@ -263,7 +263,7 @@ bool ContextMenuUtil::_GenerateMessage(const wchar_t* command, int cmdIndex, wst
 
 	message->append(COMMA);
 	message->append(QUOTE);
-	message->append(ARGS);
+	message->append(VALUES);
 	message->append(QUOTE);
 	message->append(COLON);
 	message->append(OPEN_BRACE);

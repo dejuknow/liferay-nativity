@@ -229,7 +229,7 @@ bool LiferayNativityOverlay::_IsMonitoredFileState(const wchar_t* filePath)
 
 bool LiferayNativityOverlay::_GenerateMessage(const wchar_t* file,  wstring* message)
 {
-	//{cmd:1,args:["args","arg2","arg3"]}
+	//{cmd:1,values:["args","arg2","arg3"]}
 	message->append(OPEN_CURLY_BRACE);
 	message->append(QUOTE);
 	message->append(COMMAND);
@@ -242,7 +242,7 @@ bool LiferayNativityOverlay::_GenerateMessage(const wchar_t* file,  wstring* mes
 
 	message->append(COMMA);
 	message->append(QUOTE);
-	message->append(ARGS);
+	message->append(VALUES);
 	message->append(QUOTE);
 	message->append(COLON);
 	message->append(OPEN_BRACE);
