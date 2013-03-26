@@ -165,20 +165,36 @@ bool ContextMenuUtil::InitMenus(void)
 
 bool ContextMenuUtil::PerformAction(int index)
 {
-	wstring* command = new wstring();
+	wstring* message = new wstring();
 	wstring* response = new wstring();
 	bool success = false;
 
-	if(_GenerateMessage(PERFORM_ACTION, index, command))
+	vector<wstring>* args = new vector<wstring>;
+	wchar_t* buf =  new wchar_t(10);
+	_itow_s(index, buf, 10, 10);
+	wstring* temp = new wstring(buf);
+	
+	wstring* command = new wstring();
+
+	command = _menuList->at(index);
+
+
+	args->push_back(*temp);
+	args->push_back(*command);
+
+	if(CommunicationProcessor::CreateMessage(PERFORM_ACTION, args, message))
 	{
-		if(_communicationSocket->SendMessageReceiveResponse(command->c_str(), response))
+		if(_communicationSocket->SendMessageReceiveResponse(message->c_str(), response))
 		{
 			success = true;
 		}
 	}
 
+	delete temp;
 	delete response;
 	delete command;
+	delete args;
+
 	return success;
 }
 
@@ -190,7 +206,7 @@ bool ContextMenuUtil::_GetMenuList(void)
 
 	bool success = false;
 
-	if(_GenerateMessage(GET_MENU_LIST, -1, getMenuMessage))
+	if(CommunicationProcessor::CreateMessage(GET_MENU_LIST, _selectedFiles, getMenuMessage))
 	{
 		if(_communicationSocket->SendMessageReceiveResponse(getMenuMessage->c_str(), getMenuReceived))
 		{
@@ -231,7 +247,7 @@ bool ContextMenuUtil::_GetHelpText(void)
 
 	bool success = false;
 
-	if(_GenerateMessage(GET_HELP_ITEMS, -1, getHelpMessage))
+	if(CommunicationProcessor::CreateMessage(GET_HELP_ITEMS, _selectedFiles, getHelpMessage))
 	{
 		if(_communicationSocket->SendMessageReceiveResponse(getHelpMessage->c_str(), getHelpReceived))
 		{
@@ -246,63 +262,4 @@ bool ContextMenuUtil::_GetHelpText(void)
 	delete getHelpReceived;
 
 	return success;
-}
-
-bool ContextMenuUtil::_GenerateMessage(const wchar_t* command, int cmdIndex, wstring* message)
-{
-	//{cmd:1,value:["args","arg2","arg3"]}
-	message->append(OPEN_CURLY_BRACE);
-	message->append(QUOTE);
-	message->append(COMMAND);
-	message->append(QUOTE);
-	message->append(COLON);
-
-	message->append(QUOTE);
-	message->append(command);
-	message->append(QUOTE);
-
-	message->append(COMMA);
-	message->append(QUOTE);
-	message->append(VALUES);
-	message->append(QUOTE);
-	message->append(COLON);
-	message->append(OPEN_BRACE);
-
-	if(cmdIndex >= 0){
-		wchar_t* buf =  new wchar_t(10);
-
-		_itow_s(cmdIndex, buf, 10, 10);
-
-		message->append(QUOTE);
-		message->append(buf);
-		message->append(QUOTE);
-		message->append(COMMA);
-	}
-
-	vector<wstring>::iterator fileIterator = _selectedFiles->begin();
-
-	int index = 0;
-
-	while(fileIterator != _selectedFiles->end()) 
-	{
-		if(index > 0)
-		{
-			message->append(COMMA);
-		}
-
-		message->append(QUOTE);
-
-		wstring file = *fileIterator;
-
-		message->append(file.c_str());
-		message->append(QUOTE);
-
-		fileIterator++;
-		index++;
-	}
-
-	message->append(CLOSE_BRACE);
-	message->append(CLOSE_CURLY_BRACE);
-
-	return true;
 }
