@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -11,10 +11,10 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
 package com.liferay.nativity.test;
 
-import com.liferay.nativity.plugincontrol.win.WindowsNativityPluginControlImpl;
+import com.liferay.nativity.modules.contextmenu.win.WindowsContextMenuControlImpl;
+import com.liferay.nativity.plugincontrol.NativityPluginControl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,28 +26,20 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Gail Hernandez
  */
-public class TestPlugIn extends WindowsNativityPluginControlImpl {
+public class TestContextMenuControl extends WindowsContextMenuControlImpl{
 
-	public TestPlugIn() {
-		_logger.debug("TestPlugIn");
-
-		_random = new Random();
+	public TestContextMenuControl(NativityPluginControl pluginControl) {
+		super(pluginControl);
 	}
 
 	@Override
-	public void fireMenuItemExecuted(int index, String[] paths) {
-		_logger.debug("Fired {} : {}", index, paths);
-	}
+	public String[] getHelpItemsForMenus(String[] paths) {
+		_logger.debug("getMenuItems {}", paths);
 
-	public int getFileIconForFile(String path) {
-		return _random.nextInt(10);
-	}
-
-	@Override
-	public String[] getHelpItemsForMenus(String[] files) {
-		_logger.debug("getHelpItemsForMenus {}", files);
-
-		int count = _random.nextInt(10);
+		int count = _random.nextInt(20);
+		while (count < 3) {
+			count = _random.nextInt(20);
+		}
 
 		List<String> items = new ArrayList<String>();
 
@@ -58,8 +50,9 @@ public class TestPlugIn extends WindowsNativityPluginControlImpl {
 		return items.toArray(new String[0]);
 	}
 
-	public String[] getMenuItems(String[] files) {
-		_logger.debug("getMenuItems {}", files);
+	@Override
+	public String[] getMenuItems(String[] paths) {
+		_logger.debug("getMenuItems {}", paths);
 
 		int count = _random.nextInt(20);
 		while (count < 3) {
@@ -75,12 +68,13 @@ public class TestPlugIn extends WindowsNativityPluginControlImpl {
 		return items.toArray(new String[0]);
 	}
 
-	protected void menuItemExecuted(int index, String[] files) {
-		_logger.debug("menuItemExecuted {} {}", index, files);
-	}
-
+	@Override
+	public void onExecuteMenuItem(int menuIndex, String menuText, String[] paths) {
+		_logger.debug("menuItemExecuted {} {}", menuIndex, paths);
+	} 
+	
 	private static Logger _logger = LoggerFactory.getLogger(
-			TestPlugIn.class.getName());
+		TestContextMenuControl.class.getName());
 
 	private Random _random;
 

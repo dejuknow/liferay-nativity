@@ -16,6 +16,7 @@ package com.liferay.nativity.plugincontrol.mac;
 
 import com.liferay.nativity.plugincontrol.NativityMessage;
 
+
 /**
  * @author Dennis Ju
  */

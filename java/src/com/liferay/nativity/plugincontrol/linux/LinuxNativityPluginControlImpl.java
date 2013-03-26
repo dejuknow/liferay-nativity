@@ -16,7 +16,6 @@ package com.liferay.nativity.plugincontrol.linux;
 
 import com.liferay.nativity.plugincontrol.NativityMessage;
 import com.liferay.nativity.plugincontrol.NativityPluginControl;
-import com.liferay.nativity.plugincontrol.win.PluginException;
 
 /**
  * @author Dennis Ju
@@ -24,7 +23,7 @@ import com.liferay.nativity.plugincontrol.win.PluginException;
 public class LinuxNativityPluginControlImpl extends NativityPluginControl {
 
 	@Override
-	public void connect() throws PluginException {
+	public void connect() {
 
 		// TODO Auto-generated method stub
 
