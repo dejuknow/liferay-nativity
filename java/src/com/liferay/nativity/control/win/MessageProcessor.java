@@ -12,9 +12,10 @@
  * details.
  */
 
-package com.liferay.nativity.control.win;
+package com.liferay.nativity.plugincontrol.win;
 
-import com.liferay.nativity.control.NativityMessage;
+import com.liferay.nativity.plugincontrol.NativityMessage;
+import com.liferay.nativity.plugincontrol.mac.MessageListener;
 
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
@@ -27,8 +28,6 @@ import java.net.Socket;
 
 import java.nio.charset.Charset;
 
-import java.util.ArrayList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +37,10 @@ import org.slf4j.LoggerFactory;
 public class MessageProcessor implements Runnable {
 
 	public MessageProcessor(
-		Socket clientSocket, WindowsNativityControlImpl nativityControl) {
+		Socket clientSocket, WindowsNativityPluginControlImpl plugIn) {
 
 		_clientSocket = clientSocket;
-		_nativityControl = nativityControl;
+		_plugIn = plugIn;
 	}
 
 	@Override
@@ -85,29 +84,27 @@ public class MessageProcessor implements Runnable {
 	private void _handle(String receivedMessage) throws IOException {
 		_logger.debug("Message {}", receivedMessage);
 
+		if (_messageListener == null) {
+			return;
+		}
+
 		JSONDeserializer<NativityMessage> jsonDeserializer =
 			new JSONDeserializer<NativityMessage>();
-
-		jsonDeserializer.use("value", ArrayList.class);
 
 		try {
 			NativityMessage message = jsonDeserializer.deserialize(
 				receivedMessage, NativityMessage.class);
 
-			NativityMessage responseMessage = _nativityControl.fireOnMessage(
+			NativityMessage responseMessage = _plugIn.fireMessageListener(
 				message);
 
 			if (responseMessage == null) {
-				_logger.debug("Response Null");
-
 				_returnEmpty();
 			}
 			else {
 				String response =
 					_jsonSerializer.exclude("*.class")
 						.deepSerialize(responseMessage);
-
-				_logger.debug("Response {}",response);
 
 				_outputStreamWriter.write(response);
 				_outputStreamWriter.write("\0");
@@ -155,7 +152,8 @@ public class MessageProcessor implements Runnable {
 
 	private Socket _clientSocket;
 	private InputStreamReader _inputStreamReader;
-	private WindowsNativityControlImpl _nativityControl;
+	private MessageListener _messageListener;
 	private OutputStreamWriter _outputStreamWriter;
+	private WindowsNativityPluginControlImpl _plugIn;
 
 }
