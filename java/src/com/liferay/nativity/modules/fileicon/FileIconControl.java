@@ -14,91 +14,92 @@
 
 package com.liferay.nativity.modules.fileicon;
 
-import com.liferay.nativity.modules.fileicon.mac.AppleFileIconControlImpl;
-import com.liferay.nativity.modules.fileicon.win.WindowsFileIconControlImpl;
-import com.liferay.nativity.plugincontrol.NativityPluginControl;
-import com.liferay.util.OSDetector;
-
 import java.util.Map;
 
 /**
  * @author Dennis Ju
  */
-public abstract class FileIconControl {
+public interface FileIconControl extends FileIconControlCallback {
 
-	public FileIconControl(NativityPluginControl pluginControl) {
-		_pluginControl = pluginControl;
+	/**
+	 * Disables file icon overlays
+	 */
+	public void disableFileIcons();
 
-		if (_fileIconControlBaseDelegate == null) {
-			if (OSDetector.isApple()) {
-				_fileIconControlBaseDelegate = createAppleFileIconControlBase();
-			}
-			else if (OSDetector.isWindows()) {
-				_fileIconControlBaseDelegate =
-					createWindowsFileIconControlBase();
-			}
-		}
-	}
+	/**
+	 * Enables file icon overlays
+	 */
+	public void enableFileIcons();
 
-	public void disableFileIcons() {
-		_fileIconControlBaseDelegate.disableFileIcons();
-	}
+	/**
+	 * Mac only
+	 *
+	 * Register an overlay icon
+	 *
+	 * @param path to the overlay icon
+	 *
+	 * @return overlay icon id. -1 if the icon failed ot register.
+	 */
+	public int registerIcon(String path);
 
-	public void enableFileIcons() {
-		_fileIconControlBaseDelegate.enableFileIcons();
-	}
+	/**
+	 * Mac only
+	 *
+	 * Removes all file icon overlays
+	 */
+	public void removeAllFileIcons();
 
-	// Windows only
+	/**
+	 * Removes file icon overlay
+	 *
+	 * @param file path to remove the file icon overlay
+	 */
+	public void removeFileIcon(String path);
 
-	public abstract int getIconForFile(String path);
+	/**
+	 * Removes file icon overlays
+	 *
+	 * @param file paths to remove file icon overlays
+	 */
+	public void removeFileIcons(String[] paths);
 
-	public int registerIcon(String path) {
-		return _fileIconControlBaseDelegate.registerIcon(path);
-	}
+	/**
+	 * Mac only
+	 *
+	 * Set file icon overlay
+	 *
+	 * @param file path to set file icon overlays
+	 *
+	 * @param id of file icon overlay
+	 */
+	public void setFileIcon(String path, int iconId);
 
-	public void removeAllFileIcons() {
-		_fileIconControlBaseDelegate.removeAllFileIcons();
-	}
+	/**
+	 * Mac only
+	 *
+	 * Set file icon overlays
+	 *
+	 * @param map containing paths and file icon overlay ids
+	 */
+	public void setFileIcons(Map<String, Integer> fileIconsMap);
 
-	public void removeFileIcon(String fileName) {
-		_fileIconControlBaseDelegate.removeFileIcon(fileName);
-	}
+	/**
+	 * Optionally set the root folder filter path for requests made
+	 * to the native service. For example, setting a value of "/test/folder"
+	 * indicates that any requests for files that are not a child of
+	 * "/test/folder" will be ignored. This can improve native performance.
+	 *
+	 * @param root folder path to filter by (inclusive)
+	 */
+	public abstract void setFilterPath(String folder);
 
-	public void removeFileIcons(String[] fileNames) {
-		_fileIconControlBaseDelegate.removeFileIcons(fileNames);
-	}
-
-	public void setIconForFile(String fileName, int iconId) {
-		_fileIconControlBaseDelegate.setIconForFile(fileName, iconId);
-	}
-
-	public void setIconsForFiles(Map<String, Integer> fileIconsMap) {
-		_fileIconControlBaseDelegate.setIconsForFiles(fileIconsMap);
-	}
-
-	public void unregisterIcon(int id) {
-		_fileIconControlBaseDelegate.unregisterIcon(id);
-	}
-
-	protected FileIconControlBase createAppleFileIconControlBase() {
-		return new AppleFileIconControlImpl(_pluginControl) {
-			@Override
-			public int getIconForFile(String path) {
-				return FileIconControl.this.getIconForFile(path);
-			}
-		};
-	}
-
-	protected FileIconControlBase createWindowsFileIconControlBase() {
-		return new WindowsFileIconControlImpl(_pluginControl) {
-			@Override
-			public int getIconForFile(String path) {
-				return FileIconControl.this.getIconForFile(path);
-			}
-		};
-	}
-
-	private FileIconControlBase _fileIconControlBaseDelegate;
-	private NativityPluginControl _pluginControl;
+	/**
+	 * Mac only
+	 *
+	 * Unregister an overlay icon
+	 *
+	 * @param overlay icon id
+	 */
+	public void unregisterIcon(int id);
 
 }

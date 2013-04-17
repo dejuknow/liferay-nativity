@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -36,46 +36,38 @@ public class WindowsUtil {
 
 	public static boolean setRootFolder(String rootFolderPath) {
 		rootFolderPath = _fixPath(rootFolderPath);
-		
-		if(!isLoaded()) {
+
+		if (!isLoaded()) {
 			return false;
 		}
-		
+
 		return _setRootFolder(rootFolderPath);
 	}
 
 	public static boolean updateExplorer(
 		String filePath, ExplorerConstants eventType) {
-		
+
 		filePath = _fixPath(filePath);
-		
-		if(!isLoaded()) {
+
+		if (!isLoaded()) {
 			return false;
 		}
-		
+
 		return _updateExplorer(filePath, eventType.getValue());
 	}
 
 	public static boolean updateRenameExplorer(
 		String oldPath, String filePath, ExplorerConstants eventType) {
-		
+
 		oldPath = _fixPath(oldPath);
 		filePath = _fixPath(filePath);
-		
-		
-		if(!isLoaded()) {
+
+		if (!isLoaded()) {
 			return false;
 		}
-		
+
 		return _updateRenameExplorer(oldPath, filePath, eventType.getValue());
 	}
-	
-	private static native boolean _setRootFolder(String rootFolderPath);
-
-	private static native boolean _updateExplorer(String filePath, int eventType);
-
-	private static native boolean _updateRenameExplorer(
-	String oldPath, String filePath, int eventType);
 
 	private static String _fixPath(String name) {
 		if (name == null) {
@@ -83,6 +75,16 @@ public class WindowsUtil {
 		}
 
 		return name.replace("\\", "/");
+	}
+
+	private static String _getFilePath(String parentPath, String name) {
+		StringBuilder sb = new StringBuilder(3);
+
+		sb.append(parentPath);
+		sb.append(File.separator);
+		sb.append(name);
+
+		return _fixPath(sb.toString());
 	}
 
 	private static String _getParentPath(String path) throws IOException {
@@ -98,7 +100,7 @@ public class WindowsUtil {
 
 		return parentPath;
 	}
-	
+
 	private static void _load() {
 		_loaded = false;
 
@@ -145,17 +147,6 @@ public class WindowsUtil {
 
 		_logger.error("Unable to load library");
 	}
-	
-	private static String _getFilePath(String parentPath, String name) {
-		StringBuilder sb = new StringBuilder(3);
-
-		sb.append(parentPath);
-		sb.append(File.separator);
-		sb.append(name);
-
-		return _fixPath(sb.toString());
-	}
-
 
 	private static boolean _loadLibrary(boolean fullPath, String path) {
 		try {
@@ -179,7 +170,14 @@ public class WindowsUtil {
 
 		return _loaded;
 	}
-	
+
+	private static native boolean _setRootFolder(String rootFolderPath);
+
+	private static native boolean _updateExplorer(String filePath, int eventType);
+
+	private static native boolean _updateRenameExplorer(
+	String oldPath, String filePath, int eventType);
+
 	private static boolean _loaded = false;
 
 	private static Logger _logger = LoggerFactory.getLogger(

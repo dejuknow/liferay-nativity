@@ -15,10 +15,12 @@
 package com.liferay.nativity.modules.contextmenu.mac;
 
 import com.liferay.nativity.Constants;
-import com.liferay.nativity.modules.contextmenu.ContextMenuControlBase;
-import com.liferay.nativity.plugincontrol.MessageListener;
-import com.liferay.nativity.plugincontrol.NativityMessage;
-import com.liferay.nativity.plugincontrol.NativityPluginControl;
+import com.liferay.nativity.control.MessageListener;
+import com.liferay.nativity.control.NativityControl;
+import com.liferay.nativity.control.NativityMessage;
+import com.liferay.nativity.modules.contextmenu.ContextMenuControl;
+import com.liferay.nativity.modules.contextmenu.ContextMenuControlCallback;
+import com.liferay.nativity.modules.contextmenu.model.ContextMenuItem;
 
 import java.util.List;
 import java.util.Map;
@@ -26,60 +28,56 @@ import java.util.Map;
 /**
  * @author Dennis Ju
  */
-public abstract class AppleContextMenuControlImpl
-	extends ContextMenuControlBase {
+public class AppleContextMenuControlImpl extends ContextMenuControl {
 
-	public AppleContextMenuControlImpl(NativityPluginControl pluginControl) {
-		super(pluginControl);
+	public AppleContextMenuControlImpl(
+		NativityControl nativityControl,
+		ContextMenuControlCallback contextMenuControlCallback) {
+
+		super(nativityControl, contextMenuControlCallback);
 
 		MessageListener menuQueryMessageListener = new MessageListener(
 			Constants.MENU_QUERY) {
 
 			@Override
-			public NativityMessage onMessageReceived(NativityMessage message) {
+			public NativityMessage onMessage(NativityMessage message) {
 				_currentFiles = (List<String>)message.getValue();
 
 				String[] currentFilesArray =
 					(String[])_currentFiles.toArray(
 						new String[_currentFiles.size()]);
 
-				String[] items = getMenuItems(currentFilesArray);
+				List<ContextMenuItem> items = getMenuItem(currentFilesArray);
 
 				return new NativityMessage(Constants.MENU_ITEMS, items);
 			}
 		};
 
-		pluginControl.registerMessageListener(menuQueryMessageListener);
+		nativityControl.registerMessageListener(menuQueryMessageListener);
 
 		MessageListener menuExecMessageListener = new MessageListener(
 			Constants.MENU_EXEC) {
+
 			@Override
-			public NativityMessage onMessageReceived(NativityMessage message) {
-				Map<String, Object> args =
+			public NativityMessage onMessage(NativityMessage message) {
+				Map<String, Object> value =
 					(Map<String, Object>)message.getValue();
 
-				int menuIndex = (Integer)args.get(Constants.MENU_INDEX);
-				String menuText = (String)args.get(Constants.MENU_TEXT);
+				String menuText = (String)value.get("title");
+				Integer id = (Integer)value.get("id");
 
 				String[] currentFiles =
 					(String[])_currentFiles.toArray(
 						new String[_currentFiles.size()]);
 
-				fireExecuteMenuItemListeners(menuIndex, menuText, currentFiles);
+				//TODO
+				//fireAction(id, menuText, currentFiles);
 
 				return null;
 			}
 		};
 
-		pluginControl.registerMessageListener(menuExecMessageListener);
-	}
-
-	@Override
-	public final void setContextMenuTitle(String title) {
-		NativityMessage message = new NativityMessage(
-			Constants.SET_MENU_TITLE, title);
-
-		pluginControl.sendMessage(message);
+		nativityControl.registerMessageListener(menuExecMessageListener);
 	}
 
 	private List<String> _currentFiles;

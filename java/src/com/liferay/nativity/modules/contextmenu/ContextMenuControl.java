@@ -14,115 +14,54 @@
 
 package com.liferay.nativity.modules.contextmenu;
 
-import com.liferay.nativity.Constants;
-import com.liferay.nativity.modules.contextmenu.listeners.ExecuteMenuItemListener;
-import com.liferay.nativity.modules.contextmenu.mac.AppleContextMenuControlImpl;
-import com.liferay.nativity.modules.contextmenu.win.WindowsContextMenuControlImpl;
-import com.liferay.nativity.plugincontrol.NativityMessage;
-import com.liferay.nativity.plugincontrol.NativityPluginControl;
-import com.liferay.util.OSDetector;
+import com.liferay.nativity.control.NativityControl;
+import com.liferay.nativity.modules.contextmenu.model.ContextMenuItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Dennis Ju
  */
-public abstract class ContextMenuControl {
+public abstract class ContextMenuControl implements ContextMenuControlCallback {
 
-	public ContextMenuControl(NativityPluginControl pluginControl) {
-		_pluginControl = pluginControl;
+	public ContextMenuControl(
+		NativityControl nativityControl,
+		ContextMenuControlCallback contextMenuControlCallback) {
 
-		if (_contextMenuControlBaseDelegate == null) {
-			if (OSDetector.isApple()) {
-				_contextMenuControlBaseDelegate =
-					createAppleContextMenuControlBase();
-			}
-			else if (OSDetector.isWindows()) {
-				_contextMenuControlBaseDelegate =
-					createWindowsContextMenuControlBase();
+		this.nativityControl = nativityControl;
+		this.contextMenuControlCallback = contextMenuControlCallback;
+
+		_contextMenuItems = new ArrayList<ContextMenuItem>();
+	}
+
+	public void fireAction(long id, String[] paths) {
+		for (ContextMenuItem contextMenuItem : _contextMenuItems) {
+			if (contextMenuItem.getId() == id) {
+				contextMenuItem.fireActions(paths);
+
+				break;
 			}
 		}
 	}
 
-	public void addExecuteMenuItemListener(
-		ExecuteMenuItemListener executeMenuItemListener) {
+	@Override
+	public List<ContextMenuItem> getMenuItem(String[] paths) {
+		List<ContextMenuItem> contextMenuItems =
+			contextMenuControlCallback.getMenuItem(paths);
 
-		_contextMenuControlBaseDelegate.addExecuteMenuItemListener(
-			executeMenuItemListener);
+		_contextMenuItems.clear();
+
+		for (ContextMenuItem contextMenuItem : contextMenuItems) {
+			_contextMenuItems.addAll(contextMenuItem.getAllContextMenuItems());
+		}
+
+		return contextMenuItems;
 	}
 
-	/**
-	 * Set the listener that triggers when a context menu opens
-	 *
-	 * @param a
-	 *            MenuItemListener
-	 */
+	protected ContextMenuControlCallback contextMenuControlCallback;
+	protected NativityControl nativityControl;
 
-	public abstract String[] getHelpItemsForMenus(String[] files);
-
-	public abstract String[] getMenuItems(String[] paths);
-
-	public void removeAllExecuteMenuItemListeners() {
-
-		_contextMenuControlBaseDelegate.removeAllExecuteMenuItemListeners();
-	}
-
-	public void removeExecuteMenuItemListener(
-		ExecuteMenuItemListener executeMenuItemListener) {
-
-		_contextMenuControlBaseDelegate.removeExecuteMenuItemListener(
-			executeMenuItemListener);
-	}
-
-	/**
-	 * Set title of root context menu item, all other items will be added as
-	 * children of it
-	 *
-	 * @param new title of item
-	 */
-	public void setContextMenuTitle(String title) {
-		NativityMessage message = new NativityMessage(
-			Constants.SET_MENU_TITLE, title);
-
-		_pluginControl.sendMessage(message);
-	}
-
-	/**
-	 * @return
-	 */
-	protected ContextMenuControlBase createAppleContextMenuControlBase() {
-		return new AppleContextMenuControlImpl(_pluginControl) {
-
-			@Override
-			public String[] getMenuItems(String[] paths) {
-				return ContextMenuControl.this.getMenuItems(paths);
-			}
-
-			@Override
-			public String[] getHelpItemsForMenus(String[] paths) {
-				return ContextMenuControl.this.getMenuItems(paths);
-			}
-		};
-	}
-
-	/**
-	 * @return
-	 */
-	protected ContextMenuControlBase createWindowsContextMenuControlBase() {
-		return new WindowsContextMenuControlImpl(_pluginControl) {
-
-			@Override
-			public String[] getMenuItems(String[] paths) {
-
-				return ContextMenuControl.this.getMenuItems(paths);
-			}
-
-			@Override
-			public String[] getHelpItemsForMenus(String[] paths) {
-				return ContextMenuControl.this.getMenuItems(paths);
-			}
-		};
-	}
-
-	private ContextMenuControlBase _contextMenuControlBaseDelegate;
-	private NativityPluginControl _pluginControl;
+	private List<ContextMenuItem> _contextMenuItems;
 
 }

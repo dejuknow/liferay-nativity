@@ -95,16 +95,6 @@ OSStatus SendFinderSyncEvent(const FSRef* inObjectRef)
 	return result;
 }
 
-- (void)notifyFileChanged:(NSString*)path
-{
-	FSRef ref;
-
-	CFURLGetFSRef((CFURLRef)[NSURL fileURLWithPath: path], &ref);
-	SendFinderSyncEvent(&ref);
-
-	[[NSWorkspace sharedWorkspace] noteFileSystemChanged:path];
-}
-
 - (void)removeAllIcons
 {
 	[fileNamesCache_ removeAllObjects];
@@ -130,6 +120,11 @@ OSStatus SendFinderSyncEvent(const FSRef* inObjectRef)
 	{
 		NSWindow* window = [windows objectAtIndex:i];
 
+		if (![window isVisible])
+		{
+			continue;
+		}
+
 		[window update];
 
 		if ([[window className] isEqualToString:@"TBrowserWindow"])
@@ -143,10 +138,15 @@ OSStatus SendFinderSyncEvent(const FSRef* inObjectRef)
 	}
 }
 
-- (void)setIcons:(NSDictionary*)iconDictionary
+- (void)setIcons:(NSDictionary*)iconDictionary filterByFolder:(NSString*)rootFolder
 {
 	for (NSString* path in iconDictionary)
 	{
+		if (rootFolder && ![path hasPrefix:rootFolder])
+		{
+			continue;
+		}
+
 		NSNumber* iconId = [iconDictionary objectForKey:path];
 
 		[fileNamesCache_ setObject:iconId forKey:path];

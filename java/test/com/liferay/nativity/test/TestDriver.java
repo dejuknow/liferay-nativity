@@ -14,21 +14,15 @@
 
 package com.liferay.nativity.test;
 
-import com.liferay.nativity.modules.contextmenu.ContextMenuControlBase;
-import com.liferay.nativity.modules.fileicon.FileIconControlBase;
-import com.liferay.nativity.plugincontrol.NativityMessage;
-import com.liferay.nativity.plugincontrol.win.WindowsNativityPluginControlImpl;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import flexjson.JSONSerializer;
+import com.liferay.nativity.control.NativityControl;
+import com.liferay.nativity.modules.fileicon.FileIconControl;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.xml.DOMConfigurator;
@@ -41,96 +35,98 @@ import org.slf4j.LoggerFactory;
  */
 public class TestDriver {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		_intitializeLogging();
-		
-		NativityMessage message =  new NativityMessage();
-		message.setCommand("BLAH");
-		List<String> items = new ArrayList<String>();
-		items.add("ONE");
-		message.setValue(items);
-		
-		JSONSerializer serializer = new JSONSerializer();
-		_logger.debug(serializer.deepSerialize(message));
 
-		_logger.debug("main");
-		
-		WindowsNativityPluginControlImpl nativityControl = new WindowsNativityPluginControlImpl();
-		TestFileIconControl fileIconControl = new TestFileIconControl(nativityControl);
-		TestContextMenuControl contextMenuControl = new TestContextMenuControl(nativityControl);
-
-		BufferedReader bufferedReader = new BufferedReader(
-			new InputStreamReader(System.in));
-
-		nativityControl.connect();
-
-		String read = "";
-		boolean stop = false;
-		try {
-			while (!stop) {
-				_list = !_list;
-
-				_logger.debug("Loop start...");
-
-				_logger.debug("_enableFileIcons");
-				_enableFileIcons(fileIconControl);
-
-				_logger.debug("_setMenuTitle");
-				_setMenuTitle(contextMenuControl);
-
-				_logger.debug("_setRootFolder");
-				_setRootFolder(nativityControl);
-
-				_logger.debug("_setSystemFolder");
-				_setSystemFolder(nativityControl);
-
-				_logger.debug("_updateFileIcon");
-				_updateFileIcon(fileIconControl);
-
-				_logger.debug("_clearFileIcon");
-				_clearFileIcon(fileIconControl);
-
-				_logger.debug("Ready?");
-
-				if (bufferedReader.ready()) {
-					_logger.debug("Reading...");
-
-					read = bufferedReader.readLine();
-
-					_logger.debug("Read {}", read);
-
-					if (read.length() > 0) {
-						stop = true;
-					}
-
-					_logger.debug("Stopping {}", stop);
-				}
-			}
-		} catch (IOException e) {
-			_logger.error(e.getMessage(), e);
-		}
+//		List<String> items = new ArrayList<String>();
+//
+//		items.add("ONE");
+//
+//		NativityMessage message = new NativityMessage("BLAH", items);
+//
+//		try {
+//			_logger.debug(_objectMapper.writeValueAsString(message));
+//		}
+//		catch (JsonProcessingException jpe) {
+//			_logger.error(jpe.getMessage(), jpe);
+//		}
+//
+//		_logger.debug("main");
+//
+//		NativityControl nativityControl =
+//			NativityControlFactory.getNativityControl();
+//
+//		FileIconControl fileIconControl =
+//			FileIconControlUtil.getFileIconControl(
+//				nativityControl, new TestFileIconControlCallback());
+//
+//		ContextMenuControlUtil.registerContextMenuControlCallback(
+//			nativityControl, new TestContextMenuControlCallback());
+//
+//		BufferedReader bufferedReader = new BufferedReader(
+//			new InputStreamReader(System.in));
+//
+//		nativityControl.connect();
+//
+//		String read = "";
+//		boolean stop = false;
+//
+//		try {
+//			while (!stop) {
+//				_list = !_list;
+//
+//				_logger.debug("Loop start...");
+//
+//				_logger.debug("_enableFileIcons");
+//				_enableFileIcons(fileIconControl);
+//
+//				_logger.debug("_registerFileIcon");
+//				_registerFileIcon(fileIconControl);
+//
+//				_logger.debug("_setFilterPath");
+//				_setFilterPath(fileIconControl);
+//
+//				_logger.debug("_setSystemFolder");
+//				_setSystemFolder(nativityControl);
+//
+//				_logger.debug("_updateFileIcon");
+//				_updateFileIcon(fileIconControl);
+//
+//				_logger.debug("_clearFileIcon");
+//				_clearFileIcon(fileIconControl);
+//
+//				_logger.debug("Ready?");
+//
+//				if (bufferedReader.ready()) {
+//					_logger.debug("Reading...");
+//
+//					read = bufferedReader.readLine();
+//
+//					_logger.debug("Read {}", read);
+//
+//					if (read.length() > 0) {
+//						stop = true;
+//					}
+//
+//					_logger.debug("Stopping {}", stop);
+//				}
+//			}
+//		}
+//		catch (IOException e) {
+//			_logger.error(e.getMessage(), e);
+//		}
 
 		_logger.debug("Done");
 	}
 
-	private static void _clearFileIcon(FileIconControlBase fileIconControl) {
+	private static void _clearFileIcon(FileIconControl fileIconControl) {
 		if (_list) {
-			String[] fileNames = new String[]
-			{
-				"C:/Users/liferay/Documents/liferay-sync/My Documents (test)/" +
-				"temp",
-				"C:/Users/liferay/Documents/liferay-sync/" +
-				"My Documents (test)temp/Sync.pptx"};
+			String[] paths = new String[] { _testFolder, _testFile };
 
-			fileIconControl.removeFileIcons(fileNames);
+			fileIconControl.removeFileIcons(paths);
 		}
 		else {
-			fileIconControl.removeFileIcon(
-				"C:/Users/liferay/Documents/liferay-sync/My Documents (test)/" +
-				"temp");
+			fileIconControl.removeFileIcon(_testFolder);
 		}
 
 		try {
@@ -141,7 +137,7 @@ public class TestDriver {
 		}
 	}
 
-	private static void _enableFileIcons(FileIconControlBase fileIconControl) {
+	private static void _enableFileIcons(FileIconControl fileIconControl) {
 		fileIconControl.enableFileIcons();
 
 		try {
@@ -160,8 +156,8 @@ public class TestDriver {
 		}
 	}
 
-	private static void _setMenuTitle(ContextMenuControlBase contextMenuControl) {
-		contextMenuControl.setContextMenuTitle("Test");
+	private static void _registerFileIcon(FileIconControl fileIconControl) {
+		_fileIconId = fileIconControl.registerIcon(_fileIconPath);
 
 		try {
 			Thread.sleep(_waitTime);
@@ -171,8 +167,8 @@ public class TestDriver {
 		}
 	}
 
-	private static void _setRootFolder(WindowsNativityPluginControlImpl nativityControl) {
-		nativityControl.setRootFolder("C:/Users/liferay/Documents/liferay-sync");
+	private static void _setFilterPath(FileIconControl fileIconControl) {
+		fileIconControl.setFilterPath(_testRootFolder);
 
 		try {
 			Thread.sleep(_waitTime);
@@ -182,8 +178,8 @@ public class TestDriver {
 		}
 	}
 
-	private static void _setSystemFolder(WindowsNativityPluginControlImpl nativityControl) {
-		nativityControl.setSystemFolder("C:/Users/liferay/Documents/liferay-sync");
+	private static void _setSystemFolder(NativityControl nativityControl) {
+		nativityControl.setSystemFolder(_testRootFolder);
 
 		try {
 			Thread.sleep(_waitTime);
@@ -193,23 +189,17 @@ public class TestDriver {
 		}
 	}
 
-	private static void _updateFileIcon(FileIconControlBase fileIconControl) {
+	private static void _updateFileIcon(FileIconControl fileIconControl) {
 		if (_list) {
 			Map<String, Integer> map = new HashMap<String, Integer>();
-			map.put(
-				"C:/Users/liferay/Documents/liferay-sync/" +
-				"My Documents (test)/temp", 1);
 
-			map.put(
-				"C:/Users/liferay/Documents/liferay-sync/" +
-				"My Documents (test)/temp/Sync.pptx", 2);
+			map.put(_testFolder, _fileIconId);
+			map.put(_testFile, _fileIconId);
 
-			fileIconControl.setIconsForFiles(map);
+			fileIconControl.setFileIcons(map);
 		}
 		else {
-			fileIconControl.setIconForFile(
-				"C:/Users/liferay/Documents/liferay-sync/" +
-				"My Documents (test)/temp", 1);
+			fileIconControl.setFileIcon(_testFolder, _fileIconId);
 		}
 
 		try {
@@ -220,8 +210,28 @@ public class TestDriver {
 		}
 	}
 
-	private static boolean _list = false; private static int _waitTime = 1000;
+	private static int _fileIconId = -1;
+
+	private static String _fileIconPath = "/Users/liferay/Desktop/test.icns";
+
+	private static boolean _list = false;
+
 	private static Logger _logger = LoggerFactory.getLogger(
 		TestDriver.class.getName());
+
+	private static ObjectMapper _objectMapper =
+		new ObjectMapper().configure(
+			JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+
+	private static String _testFile =
+		"C:/Users/liferay/Documents/liferay-sync/Sync.pptx";
+
+	private static String _testFolder =
+		"C:/Users/liferay/Documents/liferay-sync/My Documents (test)/temp";
+
+	private static String _testRootFolder =
+		"C:/Users/liferay/Documents/liferay-sync";
+
+	private static int _waitTime = 1000;
 
 }
