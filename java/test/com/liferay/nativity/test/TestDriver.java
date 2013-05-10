@@ -14,24 +14,15 @@
 
 package com.liferay.nativity.test;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.liferay.nativity.control.NativityControl;
-import com.liferay.nativity.control.NativityControlFactory;
-import com.liferay.nativity.control.NativityMessage;
-import com.liferay.nativity.modules.contextmenu.ContextMenuControl;
-import com.liferay.nativity.modules.contextmenu.ContextMenuControlFactory;
 import com.liferay.nativity.modules.fileicon.FileIconControl;
-import com.liferay.nativity.modules.fileicon.FileIconControlFactory;
 
-import flexjson.JSONSerializer;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.xml.DOMConfigurator;
@@ -47,88 +38,83 @@ public class TestDriver {
 	public static void main(String[] args) {
 		_intitializeLogging();
 
-		NativityMessage message =  new NativityMessage();
-
-		message.setCommand("BLAH");
-
-		List<String> items = new ArrayList<String>();
-
-		items.add("ONE");
-
-		message.setValue(items);
-
-		JSONSerializer serializer = new JSONSerializer();
-
-		_logger.debug(serializer.deepSerialize(message));
-
-		_logger.debug("main");
-
-		NativityControl nativityControl =
-			NativityControlFactory.getNativityControl();
-
-		FileIconControl fileIconControl =
-			FileIconControlFactory.getFileIconControl(
-				nativityControl, new TestFileIconControlCallback());
-
-		ContextMenuControl contextMenuControl =
-			ContextMenuControlFactory.getContextMenuControl(
-			nativityControl, new TestContextMenuControlCallback());
-
-		BufferedReader bufferedReader = new BufferedReader(
-			new InputStreamReader(System.in));
-
-		nativityControl.connect();
-
-		String read = "";
-		boolean stop = false;
-
-		try {
-			while (!stop) {
-				_list = !_list;
-
-				_logger.debug("Loop start...");
-
-				_logger.debug("_enableFileIcons");
-				_enableFileIcons(fileIconControl);
-
-				_logger.debug("_registerFileIcon");
-				_registerFileIcon(fileIconControl);
-
-				_logger.debug("_setMenuTitle");
-				_setMenuTitle(contextMenuControl);
-
-				_logger.debug("_setRootFolder");
-				_setRootFolder(nativityControl);
-
-				_logger.debug("_setSystemFolder");
-				_setSystemFolder(nativityControl);
-
-				_logger.debug("_updateFileIcon");
-				_updateFileIcon(fileIconControl);
-
-				_logger.debug("_clearFileIcon");
-				_clearFileIcon(fileIconControl);
-
-				_logger.debug("Ready?");
-
-				if (bufferedReader.ready()) {
-					_logger.debug("Reading...");
-
-					read = bufferedReader.readLine();
-
-					_logger.debug("Read {}", read);
-
-					if (read.length() > 0) {
-						stop = true;
-					}
-
-					_logger.debug("Stopping {}", stop);
-				}
-			}
-		}
-		catch (IOException e) {
-			_logger.error(e.getMessage(), e);
-		}
+//		List<String> items = new ArrayList<String>();
+//
+//		items.add("ONE");
+//
+//		NativityMessage message = new NativityMessage("BLAH", items);
+//
+//		try {
+//			_logger.debug(_objectMapper.writeValueAsString(message));
+//		}
+//		catch (JsonProcessingException jpe) {
+//			_logger.error(jpe.getMessage(), jpe);
+//		}
+//
+//		_logger.debug("main");
+//
+//		NativityControl nativityControl =
+//			NativityControlFactory.getNativityControl();
+//
+//		FileIconControl fileIconControl =
+//			FileIconControlUtil.getFileIconControl(
+//				nativityControl, new TestFileIconControlCallback());
+//
+//		ContextMenuControlUtil.registerContextMenuControlCallback(
+//			nativityControl, new TestContextMenuControlCallback());
+//
+//		BufferedReader bufferedReader = new BufferedReader(
+//			new InputStreamReader(System.in));
+//
+//		nativityControl.connect();
+//
+//		String read = "";
+//		boolean stop = false;
+//
+//		try {
+//			while (!stop) {
+//				_list = !_list;
+//
+//				_logger.debug("Loop start...");
+//
+//				_logger.debug("_enableFileIcons");
+//				_enableFileIcons(fileIconControl);
+//
+//				_logger.debug("_registerFileIcon");
+//				_registerFileIcon(fileIconControl);
+//
+//				_logger.debug("_setFilterPath");
+//				_setFilterPath(fileIconControl);
+//
+//				_logger.debug("_setSystemFolder");
+//				_setSystemFolder(nativityControl);
+//
+//				_logger.debug("_updateFileIcon");
+//				_updateFileIcon(fileIconControl);
+//
+//				_logger.debug("_clearFileIcon");
+//				_clearFileIcon(fileIconControl);
+//
+//				_logger.debug("Ready?");
+//
+//				if (bufferedReader.ready()) {
+//					_logger.debug("Reading...");
+//
+//					read = bufferedReader.readLine();
+//
+//					_logger.debug("Read {}", read);
+//
+//					if (read.length() > 0) {
+//						stop = true;
+//					}
+//
+//					_logger.debug("Stopping {}", stop);
+//				}
+//			}
+//		}
+//		catch (IOException e) {
+//			_logger.error(e.getMessage(), e);
+//		}
 
 		_logger.debug("Done");
 	}
@@ -181,19 +167,8 @@ public class TestDriver {
 		}
 	}
 
-	private static void _setMenuTitle(ContextMenuControl contextMenuControl) {
-		contextMenuControl.setContextMenuTitle("Test");
-
-		try {
-			Thread.sleep(_waitTime);
-		}
-		catch (InterruptedException e) {
-			_logger.error(e.getMessage(), e);
-		}
-	}
-
-	private static void _setRootFolder(NativityControl nativityControl) {
-		nativityControl.setRootFolder(_testRootFolder);
+	private static void _setFilterPath(FileIconControl fileIconControl) {
+		fileIconControl.setFilterPath(_testRootFolder);
 
 		try {
 			Thread.sleep(_waitTime);
@@ -243,6 +218,10 @@ public class TestDriver {
 
 	private static Logger _logger = LoggerFactory.getLogger(
 		TestDriver.class.getName());
+
+	private static ObjectMapper _objectMapper =
+		new ObjectMapper().configure(
+			JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
 	private static String _testFile =
 		"C:/Users/liferay/Documents/liferay-sync/Sync.pptx";
