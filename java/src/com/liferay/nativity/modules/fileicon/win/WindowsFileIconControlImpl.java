@@ -48,7 +48,6 @@ public class WindowsFileIconControlImpl extends FileIconControlBase {
 				String filePath = null;
 
 				if (message.getValue() instanceof List<?>) {
-
 					List<?> args = (List<?>)message.getValue();
 
 					if (args.size() > 0) {

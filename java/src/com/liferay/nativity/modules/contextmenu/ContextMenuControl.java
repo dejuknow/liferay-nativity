@@ -35,11 +35,11 @@ public abstract class ContextMenuControl implements ContextMenuControlCallback {
 		this.nativityControl = nativityControl;
 		this.contextMenuControlCallback = contextMenuControlCallback;
 
-		_contextMenuItems = new ArrayList<ContextMenuItem>();
+		contextMenuItems = new ArrayList<ContextMenuItem>();
 	}
 
 	public void fireContextMenuAction(String uuid, String[] paths) {
-		for (ContextMenuItem contextMenuItem : _contextMenuItems) {
+		for (ContextMenuItem contextMenuItem : contextMenuItems) {
 			if (contextMenuItem.getUuid().equals(uuid)) {
 				_logger.debug("Firing action uuid: {}, for: {}", uuid, paths);
 
@@ -52,28 +52,27 @@ public abstract class ContextMenuControl implements ContextMenuControlCallback {
 
 	@Override
 	public List<ContextMenuItem> getContextMenuItems(String[] paths) {
-		List<ContextMenuItem> contextMenuItems =
+		List<ContextMenuItem> newContextMenuItems =
 			contextMenuControlCallback.getContextMenuItems(paths);
 
-		_contextMenuItems.clear();
+		contextMenuItems.clear();
 
-		if (contextMenuItems == null) {
+		if (newContextMenuItems == null) {
 			return null;
 		}
 
-		for (ContextMenuItem contextMenuItem : contextMenuItems) {
-			_contextMenuItems.addAll(contextMenuItem.getAllContextMenuItems());
+		for (ContextMenuItem contextMenuItem : newContextMenuItems) {
+			contextMenuItems.addAll(contextMenuItem.getAllContextMenuItems());
 		}
 
-		return contextMenuItems;
+		return newContextMenuItems;
 	}
 
 	protected ContextMenuControlCallback contextMenuControlCallback;
+	protected List<ContextMenuItem> contextMenuItems;
 	protected NativityControl nativityControl;
 
 	private static Logger _logger = LoggerFactory.getLogger(
 		ContextMenuControl.class.getName());
-
-	private List<ContextMenuItem> _contextMenuItems;
 
 }
