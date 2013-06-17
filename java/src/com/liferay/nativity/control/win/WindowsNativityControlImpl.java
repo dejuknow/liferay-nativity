@@ -63,6 +63,14 @@ public class WindowsNativityControlImpl extends NativityControl {
 	}
 
 	@Override
+	public void refreshFiles(String[] paths) {
+		NativityMessage message = new NativityMessage(
+				Constants.REFRESH_FILES, paths);
+
+		sendMessage(message);
+	}
+
+	@Override
 	public String sendMessage(NativityMessage message) {
 		_send.send(message);
 
