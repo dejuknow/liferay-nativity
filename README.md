@@ -32,7 +32,7 @@ The following operating systems are currently supported:
 * Mac OS X 10.7 or greater (tested up to OS X 10.8.4)
 * Linux GNOME Nautilus 3.x or greater (tested up to Nautilus 3.6)
 
-Currently the client code is only available for Java. The following clients are currently supported. Contributions for other clients like Ruby, C++, etc are welcome.
+Currently the client code is only available for Java. Contributions for other clients like Ruby, C++, etc are welcome.
 
 <img width="500" src="https://raw.github.com/liferay/liferay-nativity/master/extra/screenshot-mac.png">
 
@@ -97,6 +97,8 @@ The code for LiferayNativityInjector is modified from the scripting additions us
 
 #### LiferayNativityFinder
 
+Once injected, LiferayNativityFinder is responsible for method swizzling the overlay icons and context menus into Finder. The original source code for method swizzling (as well as the previously used injection method through mach_inject) was written by the talented developers at [TeamDev](http://www.teamdev.com/). Kudos to TeamDev for tackling an extremely challenging programming task!
+
 Below is a brief description of the classes inside LiferayNativityFinder.
 
 * **[GCDAsyncSocket](https://github.com/robbiehanson/CocoaAsyncSocket)** - Used for interprocess communication with the client.
@@ -139,7 +141,7 @@ The key classes for the java client are:
 
 # Example Code
 
-The following example Java code will work on Windows, Mac, or Linux will overlay testFile.txt with testIcon.icns and create a context menu item titled "Nativity Test".
+The following example Java code will overlay testFile.txt with testIcon.icns and create a context menu item titled "Nativity Test".
 
 	NativityControl nativityControl = NativityControlUtil.getNativityControl();
 
@@ -197,11 +199,11 @@ The following example Java code will work on Windows, Mac, or Linux will overlay
 
 # Issue Tracking
 
-LiferayNativity is an open source project and community members are encouraged to submit bug fixes and enhancements. Please create tickets on http://issues.liferay.com under the **PUBLIC - Nativity** project.
+LiferayNativity is an open source project and community members are encouraged to submit bug fixes and enhancements. Please create tickets [here](http://issues.liferay.com/browse/NVTY).
 
 # Licensing
 
-Check [license.txt](https://github.com/liferay/liferay-nativity/blob/master/copyright.txt) for the latest licensing information.
+LiferayNativity is licensed under the LGPL. Check [license.txt](https://github.com/liferay/liferay-nativity/blob/master/copyright.txt) for the latest licensing information.
 
 # Contact
 
