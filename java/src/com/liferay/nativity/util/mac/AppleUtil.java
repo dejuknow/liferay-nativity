@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -58,6 +58,8 @@ public class AppleUtil {
 
 			AppleScriptUtil.executeScript(script);
 
+			Thread.sleep(1000);
+
 			reloadScripts();
 		}
 		catch (Exception e) {
@@ -86,11 +88,11 @@ public class AppleUtil {
 
 			Long result = (Long)AppleScriptUtil.executeScript(script);
 
-			if (result == 0) {
-				return true;
+			if ((result == null) || (result != 0)) {
+				return false;
 			}
 			else {
-				return false;
+				return true;
 			}
 		}
 		catch (Exception e) {
