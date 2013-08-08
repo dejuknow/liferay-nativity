@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -82,12 +82,16 @@ public class MessageProcessor implements Runnable {
 	}
 
 	private void _handle(String receivedMessage) throws IOException {
-		_logger.debug("Message {}", receivedMessage);
+		_logger.trace("Message {}", receivedMessage);
 
 		if (receivedMessage.charAt(0) != '{')
 		{
 			_logger.error("Invalid message {}", receivedMessage);
 			return;
+		}
+
+		if (receivedMessage.endsWith(":\\\"]}")) {
+			receivedMessage = receivedMessage.replace(":\\\"]}", "\"]}");
 		}
 
 		try {
@@ -101,9 +105,9 @@ public class MessageProcessor implements Runnable {
 				_returnEmpty();
 			}
 			else {
-				_logger.debug(
+				_logger.trace(
 					"Response {}", responseMessage.getValue().toString());
-
+				
 				_objectMapper.writeValue(_outputStreamWriter, responseMessage);
 				_outputStreamWriter.write("\0");
 			}
@@ -145,7 +149,6 @@ public class MessageProcessor implements Runnable {
 
 	private static Logger _logger = LoggerFactory.getLogger(
 		MessageProcessor.class.getName());
-
 	private static ObjectMapper _objectMapper =
 		new ObjectMapper().configure(
 			JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,6 +17,7 @@ package com.liferay.nativity.control.win;
 import com.liferay.nativity.Constants;
 import com.liferay.nativity.control.NativityControl;
 import com.liferay.nativity.control.NativityMessage;
+import com.liferay.nativity.util.win.RegistryUtil;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,10 +80,9 @@ public class WindowsNativityControlImpl extends NativityControl {
 
 	@Override
 	public void setFilterFolder(String folder) {
-		NativityMessage message = new NativityMessage(
-			Constants.SET_FILTER_PATH, folder);
-
-		sendMessage(message);
+		RegistryUtil.writeRegistry(
+			Constants.NATIVITY_REGISTRY_KEY,
+			Constants.FILTER_FOLDER_REGISTRY_NAME, folder);
 	}
 
 	@Override
@@ -102,12 +102,9 @@ public class WindowsNativityControlImpl extends NativityControl {
 		WindowsNativityControlImpl.class.getName());
 
 	private WindowsReceiveSocket _receive;
-
 	private ExecutorService _receiveExecutor =
 		Executors.newSingleThreadExecutor();
-
 	private WindowsSendSocket _send = new WindowsSendSocket();
-
 	private ExecutorService _sendExecutor = Executors.newSingleThreadExecutor();
 
 }
