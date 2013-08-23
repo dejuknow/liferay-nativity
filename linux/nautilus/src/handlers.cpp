@@ -24,10 +24,18 @@
 #include "requests.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <vector>
+//#include <boost/thread.hpp>
+#include <thread>
+#include <boost/lockfree/spsc_queue.hpp>
 #include "content.h"
 #define JSON_IS_AMALGAMATION
 #include <json/json.h>
+
+//TODO remove std and output
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 
 static GObjectClass* parent_class;
 
@@ -254,20 +262,114 @@ extern "C" GList * nautilus_liferay_get_file_items(NautilusMenuProvider* provide
 	return menuItems;
 }
 
+bool worker_thread_initiated = false;
+
+struct emblem_info
+{
+	NautilusInfoProvider* provider;
+	NautilusFileInfo* file;
+	GClosure* update_complete;
+	NautilusOperationHandle* handle;
+};
+
+boost::lockfree::spsc_queue<emblem_info*, boost::lockfree::capacity<1024> > add_emblem_queue;
+
+void nautilus_liferay_extension_update_file_info_add_emblem()
+{
+	while (1)
+	{
+		while(!add_emblem_queue.empty())
+		{
+			ofstream myfile;
+			myfile.open("/home/liferay/Desktop/overlay.txt", ios::app);
+			
+			usleep(50 * 1000);
+			
+			emblem_info* ei;
+			
+			add_emblem_queue.pop(ei);
+			
+			myfile << "here " <<endl; 
+			myfile << "update_complete ref count: " << ei->update_complete->ref_count << endl;
+			
+			//NautilusFileInfo.get_name(ei->file);
+			
+			//myfile << "fileInfo: " << ei->file->get_name() << endl;
+			
+			char* uri = nautilus_file_info_get_uri(ei->file);
+			gchar* filename = g_filename_from_uri(uri, NULL, NULL);
+
+			g_free(uri);
+			
+			nautilus_file_info_add_emblem(ei->file, ContentManager::instance().getFileIconName(filename).c_str());
+			
+			myfile << "+++worker thread" << filename << endl;
+			myfile.close();
+			
+			nautilus_info_provider_update_complete_invoke(ei->update_complete, ei->provider, (NautilusOperationHandle*) ei, NAUTILUS_OPERATION_COMPLETE);
+			
+			g_closure_unref(ei->update_complete);
+			g_object_unref(ei->file);
+			
+			g_free(filename);
+			
+			g_free(ei);
+		}
+		usleep(50*1000);
+	}
+}
+
 extern "C" NautilusOperationResult nautilus_liferay_extension_update_file_info(NautilusInfoProvider* provider, NautilusFileInfo* file, GClosure* update_complete, NautilusOperationHandle** handle)
 {
+	ofstream myfile;
+	myfile.open("/home/liferay/Desktop/overlay.txt", ios::app);
+	
+	
 	char* uri = nautilus_file_info_get_uri(file);
-
-	gchar* filename = g_filename_from_uri(uri, NULL, NULL);
-
-	if (filename != NULL)
+    
+    gchar* filename = g_filename_from_uri(uri, NULL, NULL);
+	
+	myfile << "----- main thread" << filename << endl;
+	
+	g_free(uri);
+	
+	if (filename == NULL)
 	{
-		nautilus_file_info_add_emblem(file, ContentManager::instance().getFileIconName(filename).c_str());
-
-		g_free(filename);
+		return NAUTILUS_OPERATION_COMPLETE;
 	}
+	
+	emblem_info* ei = new emblem_info();
+	ei->provider = provider;
+	ei->file = file;
+	ei->update_complete = update_complete;
+	//ei->handle = *handle;
+	
+	*handle = (NautilusOperationHandle *) ei;
+	
+	add_emblem_queue.push(ei);
+	g_closure_ref(update_complete);
+	g_object_ref(file);
+	
+	if (!worker_thread_initiated) {
+		worker_thread_initiated = true;
+		thread worker_thread(nautilus_liferay_extension_update_file_info_add_emblem);
+		worker_thread.detach();
+	}
+	
+	
+	myfile.close();
+	
+    return NAUTILUS_OPERATION_IN_PROGRESS;
+}
 
-	return NAUTILUS_OPERATION_COMPLETE;
+extern "C" void nautilus_liferay_extension_cancel_update(NautilusInfoProvider* provider, NautilusOperationHandle* handle)
+{
+	ofstream myfile;
+	myfile.open("/home/liferay/Desktop/overlay.txt", ios::app);
+	
+	myfile << "-----cancel_update fired..." << endl;
+	
+	myfile.close();
 }
 
 extern "C" void nautilus_liferay_menu_provider_iface_init(NautilusMenuProviderIface* iface)
@@ -278,6 +380,7 @@ extern "C" void nautilus_liferay_menu_provider_iface_init(NautilusMenuProviderIf
 extern "C" void nautilus_liferay_info_provider_iface_init(NautilusInfoProviderIface* iface)
 {
 	iface->update_file_info = nautilus_liferay_extension_update_file_info;
+	iface->cancel_update = nautilus_liferay_extension_cancel_update;
 }
 
 extern "C" void nautilus_liferay_instance_init(NautilusLiferay* fr)
