@@ -34,16 +34,13 @@ public class WindowsNativityControlImpl extends NativityControl {
 	public boolean connect() {
 		_logger.debug("Connecting...");
 
-		if (_send.isConnected()) {
-			return true;
-		}
+		boolean loaded = WindowsNativityWindowsUtil.isLoaded();
+
+		_logger.debug("Loaded....{}", loaded);
 
 		_receive = new WindowsReceiveSocket(this);
 
 		_receiveExecutor.execute(_receive);
-		_sendExecutor.execute(_send);
-
-		_logger.debug("Done connecting");
 
 		return true;
 	}
@@ -60,22 +57,34 @@ public class WindowsNativityControlImpl extends NativityControl {
 
 	@Override
 	public boolean loaded() {
-		return true;
+		return WindowsNativityWindowsUtil.isLoaded();
 	}
 
 	@Override
 	public void refreshFiles(String[] paths) {
-		NativityMessage message = new NativityMessage(
-				Constants.REFRESH_FILES, paths);
+		if (paths == null) {
+			return;
+		}
 
-		sendMessage(message);
+		if (!WindowsNativityWindowsUtil.isLoaded()) {
+			return;
+		}
+
+		try {
+			for (String path : paths) {
+				String temp = path.replace("/", "\\");
+				WindowsNativityWindowsUtil.updateExplorer(temp);
+			}
+		}
+		catch (UnsatisfiedLinkError e) {
+			_logger.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public String sendMessage(NativityMessage message) {
-		_send.send(message);
-
-		return "";
+		_logger.error("Invalid message {} ", message);
+		return null;
 	}
 
 	@Override
@@ -87,10 +96,16 @@ public class WindowsNativityControlImpl extends NativityControl {
 
 	@Override
 	public void setSystemFolder(String folder) {
-		NativityMessage message = new NativityMessage(
-			Constants.SET_SYSTEM_FOLDER, folder);
+		if (!WindowsNativityWindowsUtil.isLoaded()) {
+			return;
+		}
 
-		sendMessage(message);
+		try {
+			WindowsNativityWindowsUtil.setSystemFolder(folder);
+		}
+		catch (UnsatisfiedLinkError e) {
+			_logger.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -104,7 +119,5 @@ public class WindowsNativityControlImpl extends NativityControl {
 	private WindowsReceiveSocket _receive;
 	private ExecutorService _receiveExecutor =
 		Executors.newSingleThreadExecutor();
-	private WindowsSendSocket _send = new WindowsSendSocket();
-	private ExecutorService _sendExecutor = Executors.newSingleThreadExecutor();
 
 }
