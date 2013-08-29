@@ -14,8 +14,6 @@
 
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSWindow.h>
-#import <AppKit/NSWorkspace.h>
-#import <Carbon/Carbon.h>
 #import "ContentManager.h"
 #import "MenuManager.h"
 #import "RequestManager.h"
@@ -65,14 +63,16 @@ static ContentManager* sharedInstance = nil;
 	[self repaintAllWindows];
 }
 
-- (NSNumber*)iconByURL:(NSURL*)url
+- (NSNumber*)iconByPath:(NSString*)path
 {
 	if (!_fileIconsEnabled)
 	{
 		return nil;
 	}
 
-	NSNumber* result = [_fileNamesCache objectForKey:url];
+	NSString* normalizedPath = [path decomposedStringWithCanonicalMapping];
+
+	NSNumber* result = [_fileNamesCache objectForKey:normalizedPath];
 
 	return result;
 }
@@ -88,9 +88,9 @@ static ContentManager* sharedInstance = nil;
 {
 	for (NSString* path in paths)
 	{
-		NSURL* url = [NSURL fileURLWithPath:path];
+		NSString* normalizedPath = [path decomposedStringWithCanonicalMapping];
 
-		[_fileNamesCache removeObjectForKey:url];
+		[_fileNamesCache removeObjectForKey:normalizedPath];
 	}
 
 	[self repaintAllWindows];
@@ -111,7 +111,7 @@ static ContentManager* sharedInstance = nil;
 
 		MenuManager* menuManager = [MenuManager sharedInstance];
 		RequestManager* requestManager = [RequestManager sharedInstance];
-		
+
 		if ([[window className] isEqualToString:@"TBrowserWindow"])
 		{
 			NSObject* browserWindowController = [window browserWindowController];
@@ -156,17 +156,16 @@ static ContentManager* sharedInstance = nil;
 			continue;
 		}
 
-		NSURL* url = [NSURL fileURLWithPath:path];
-
+		NSString* normalizedPath = [path decomposedStringWithCanonicalMapping];
 		NSNumber* iconId = [iconDictionary objectForKey:path];
 
 		if ([iconId intValue] == -1)
 		{
-			[_fileNamesCache removeObjectForKey:url];
+			[_fileNamesCache removeObjectForKey:normalizedPath];
 		}
 		else
 		{
-			[_fileNamesCache setObject:iconId forKey:url];
+			[_fileNamesCache setObject:iconId forKey:normalizedPath];
 		}
 	}
 

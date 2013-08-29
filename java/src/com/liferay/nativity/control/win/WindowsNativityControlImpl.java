@@ -16,7 +16,6 @@ package com.liferay.nativity.control.win;
 
 import com.liferay.nativity.Constants;
 import com.liferay.nativity.control.NativityControl;
-import com.liferay.nativity.control.NativityMessage;
 import com.liferay.nativity.util.win.RegistryUtil;
 
 import java.util.concurrent.ExecutorService;
@@ -34,16 +33,13 @@ public class WindowsNativityControlImpl extends NativityControl {
 	public boolean connect() {
 		_logger.debug("Connecting...");
 
-		if (_send.isConnected()) {
-			return true;
-		}
+		boolean loaded = WindowsNativityUtil.load();
+
+		_logger.debug("Loaded {}", loaded);
 
 		_receive = new WindowsReceiveSocket(this);
 
 		_receiveExecutor.execute(_receive);
-		_sendExecutor.execute(_send);
-
-		_logger.debug("Done connecting");
 
 		return true;
 	}
@@ -60,22 +56,29 @@ public class WindowsNativityControlImpl extends NativityControl {
 
 	@Override
 	public boolean loaded() {
-		return true;
+		return WindowsNativityUtil.load();
 	}
 
 	@Override
 	public void refreshFiles(String[] paths) {
-		NativityMessage message = new NativityMessage(
-				Constants.REFRESH_FILES, paths);
+		if (paths == null) {
+			return;
+		}
 
-		sendMessage(message);
-	}
+		if (!WindowsNativityUtil.load()) {
+			return;
+		}
 
-	@Override
-	public String sendMessage(NativityMessage message) {
-		_send.send(message);
+		try {
+			for (String path : paths) {
+				String temp = path.replace("/", "\\");
 
-		return "";
+				WindowsNativityUtil.updateExplorer(temp);
+			}
+		}
+		catch (UnsatisfiedLinkError e) {
+			_logger.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -87,10 +90,16 @@ public class WindowsNativityControlImpl extends NativityControl {
 
 	@Override
 	public void setSystemFolder(String folder) {
-		NativityMessage message = new NativityMessage(
-			Constants.SET_SYSTEM_FOLDER, folder);
+		if (!WindowsNativityUtil.load()) {
+			return;
+		}
 
-		sendMessage(message);
+		try {
+			WindowsNativityUtil.setSystemFolder(folder);
+		}
+		catch (UnsatisfiedLinkError e) {
+			_logger.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -104,7 +113,5 @@ public class WindowsNativityControlImpl extends NativityControl {
 	private WindowsReceiveSocket _receive;
 	private ExecutorService _receiveExecutor =
 		Executors.newSingleThreadExecutor();
-	private WindowsSendSocket _send = new WindowsSendSocket();
-	private ExecutorService _sendExecutor = Executors.newSingleThreadExecutor();
 
 }
