@@ -21,8 +21,8 @@ import com.liferay.nativity.modules.fileicon.FileIconControlBase;
 import com.liferay.nativity.modules.fileicon.FileIconControlCallback;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Map;
 
 /**
  * @author Dennis Ju
@@ -68,6 +68,10 @@ public abstract class UnixFileIconControlBaseImpl extends FileIconControlBase {
 
 	@Override
 	public void removeAllFileIcons() {
+		NativityMessage message = new NativityMessage(
+			Constants.REMOVE_ALL_FILE_ICONS, "");
+
+		nativityControl.sendMessage(message);
 	}
 
 	public void removeFileIcon(String path) {
