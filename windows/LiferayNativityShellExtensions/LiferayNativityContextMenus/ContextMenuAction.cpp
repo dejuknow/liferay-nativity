@@ -16,9 +16,9 @@
 
 using namespace std;
 
-int ContextMenuAction::GetId()
+wstring* ContextMenuAction::GetUuid()
 {
-	return _id;
+	return _uuid;
 }
 	
 vector<wstring>* ContextMenuAction::GetFiles()
@@ -26,9 +26,9 @@ vector<wstring>* ContextMenuAction::GetFiles()
 	return _files;
 }
 	
-void ContextMenuAction::SetId(int id)
+void ContextMenuAction::SetUuid(wstring* uuid)
 {
-	_id = id;
+	_uuid = uuid;
 }
 
 
