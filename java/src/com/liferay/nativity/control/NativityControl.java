@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,11 +15,13 @@
 package com.liferay.nativity.control;
 
 import com.liferay.nativity.listeners.SocketCloseListener;
+import com.liferay.nativity.listeners.SocketOpenListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,18 +34,29 @@ public abstract class NativityControl {
 	public NativityControl() {
 		_commandMap = new HashMap<String, MessageListener>();
 		socketCloseListeners = new ArrayList<SocketCloseListener>();
+		socketOpenListeners = new ArrayList<SocketOpenListener>();
 	}
 
 	/**
-	 * Mac only
-	 *
-	 * Adds a SocketCloserListener that will be triggered when the socket
+	 * Adds a SocketCloseListener that will be triggered when the socket
 	 * connection to the native service is closed
 	 *
-	 * @param SocketCloseListener instance
+	 * @param socketCloseListener The SocketCloseListener instance to add
 	 */
-	public void addSocketCloseListener(SocketCloseListener listener) {
-		socketCloseListeners.add(listener);
+	public void addSocketCloseListener(
+		SocketCloseListener socketCloseListener) {
+
+		socketCloseListeners.add(socketCloseListener);
+	}
+
+	/**
+	 * Adds a SocketOpenListener that will be triggered when the socket
+	 * connection to the native service is closed
+	 *
+	 * @param socketOpenListener The SocketOpenListener instance to add
+	 */
+	public void addSocketOpenListener(SocketOpenListener socketOpenListener) {
+		socketOpenListeners.add(socketOpenListener);
 	}
 
 	/**
@@ -64,7 +77,8 @@ public abstract class NativityControl {
 	 * Triggers the appropriate registered MessageListener when messages are
 	 * received from the native service.
 	 *
-	 * @param NativityMessage received from the native service
+	 * @param message The NativityMessage instance received from the native
+	 * service
 	 *
 	 * @return NativityMessage to send back to the native service. Returns null
 	 * if no registered MessageListener is found or if no response
@@ -83,11 +97,36 @@ public abstract class NativityControl {
 	}
 
 	/**
+	 * Fires all SocketCloseListeners
+	 */
+	public void fireSocketCloseListeners() {
+		for (SocketCloseListener listener : socketCloseListeners) {
+			listener.onSocketClose();
+		}
+	}
+
+	/**
+	 * Fires all SocketOpenListeners
+	 */
+	public void fireSocketOpenListeners() {
+		for (SocketOpenListener listener : socketOpenListeners) {
+			listener.onSocketOpen();
+		}
+	}
+
+	/**
+	 * Mac Finder Sync only
+	 *
+	 * Gets all currently observed folders
+	 *
+	 * @return set of observed folder paths
+	 */
+	public abstract Set<String> getAllObservedFolders();
+
+	/**
 	 * Mac only
 	 *
 	 * Loads Liferay Nativity into Finder.
-	 *
-	 * @param
 	 *
 	 * @return true if successfully loaded
 	 */
@@ -98,8 +137,6 @@ public abstract class NativityControl {
 	 *
 	 * Check if Liferay Nativity is loaded in Finder.
 	 *
-	 * @param
-	 *
 	 * @return true if loaded
 	 */
 	public abstract boolean loaded();
@@ -109,7 +146,7 @@ public abstract class NativityControl {
 	 *
 	 * Causes Explorer to refresh the display of the file in explorer
 	 *
-	 * @param files to refresh
+	 * @param paths The array of file paths to refresh
 	 */
 	public abstract void refreshFiles(String[] paths);
 
@@ -120,21 +157,32 @@ public abstract class NativityControl {
 	 * Registering an instance with the same "command" parameter will replace
 	 * previously registered instances.
 	 *
-	 * @param MessageListener to register
+	 * @param messageListener The MessageListener instance to register
 	 */
 	public void registerMessageListener(MessageListener messageListener) {
 		_commandMap.put(messageListener.getCommand(), messageListener);
 	}
 
 	/**
-	 * Mac only
+	 * Removes a previously added SocketCloseListener instance
 	 *
-	 * Removes a previously added SocketCloserListener instance
-	 *
-	 * @param SocketCloseListener instance to remove
+	 * @param socketCloseListener The SocketCloseListener instance to remove
 	 */
-	public void removeSocketCloseListener(SocketCloseListener listener) {
-		socketCloseListeners.remove(listener);
+	public void removeSocketCloseListener(
+		SocketCloseListener socketCloseListener) {
+
+		socketCloseListeners.remove(socketCloseListener);
+	}
+
+	/**
+	 * Removes a previously added SocketOpenListener instance
+	 *
+	 * @param socketOpenListener The SocketOpenListener instance to remove
+	 */
+	public void removeSocketOpenListener(
+		SocketOpenListener socketOpenListener) {
+
+		socketOpenListeners.remove(socketOpenListener);
 	}
 
 	/**
@@ -142,13 +190,19 @@ public abstract class NativityControl {
 	 *
 	 * Used by modules to send messages to the native service.
 	 *
-	 * @param NativityMessage to send to the native service
+	 * @param nativityMessage The NativityMessage instance to send to the native
+	 * service
 	 *
 	 * @return response from the native service
 	 */
-	public String sendMessage(NativityMessage message) {
-		return "";
-	}
+	public abstract String sendMessage(NativityMessage nativityMessage);
+
+	/**
+	 * Convenience method for calling setFilterFolders with one folder.
+	 *
+	 * @param folder The folder path to filter by (inclusive)
+	 */
+	public abstract void setFilterFolder(String folder);
 
 	/**
 	 * Optionally set the root folder filter path for requests made
@@ -156,9 +210,9 @@ public abstract class NativityControl {
 	 * indicates that any requests for files that are not a child of
 	 * "/test/folder" will be ignored. This can improve native performance.
 	 *
-	 * @param root folder path to filter by (inclusive)
+	 * @param folders The folder paths to filter by (inclusive)
 	 */
-	public abstract void setFilterFolder(String folder);
+	public abstract void setFilterFolders(String[] folders);
 
 	/**
 	 * Windows only
@@ -166,7 +220,7 @@ public abstract class NativityControl {
 	 * Marks the specified folder as a system folder so that Desktop.ini values
 	 * will take effect.
 	 *
-	 * @param folder to set as a system folder
+	 * @param folder The path of the folder to set as a system folder
 	 */
 	public abstract void setSystemFolder(String folder);
 
@@ -175,13 +229,12 @@ public abstract class NativityControl {
 	 *
 	 * Unloads Liferay Nativity from Finder.
 	 *
-	 * @param
-	 *
 	 * @return true if successfully unloaded
 	 */
 	public abstract boolean unload() throws Exception;
 
 	protected List<SocketCloseListener> socketCloseListeners;
+	protected List<SocketOpenListener> socketOpenListeners;
 
 	private static Logger _logger = LoggerFactory.getLogger(
 		NativityControl.class.getName());

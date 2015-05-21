@@ -19,7 +19,10 @@
 
 #include "stdafx.h"
 
-class __declspec(dllexport) NativityOverlayRegistrationHandler 
+#include <iostream>
+#include <fstream>
+
+class __declspec(dllexport) NativityOverlayRegistrationHandler
 {
 	public:
 		static HRESULT MakeRegistryEntries(const CLSID& clsid, PWSTR fileType);

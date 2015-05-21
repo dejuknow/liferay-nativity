@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -34,57 +34,84 @@ public interface FileIconControl extends FileIconControlCallback {
 	/**
 	 * Mac only
 	 *
+	 * Refresh icons. When using callbacks for setting the file icons, this
+	 * must be called when new icons are set to refresh stale windows. Finder
+	 * will not request new icons from the client unless there is interaction
+	 * with the Finder window.
+	 */
+	public void refreshIcons();
+
+	/**
+	 * Mac and Linux only
+	 *
 	 * Register an overlay icon
 	 *
-	 * @param path to the overlay icon
+	 * @param path The path of the overlay icon to register
 	 *
-	 * @return overlay icon id. -1 if the icon failed ot register.
+	 * @return overlay icon id. -1 if the icon failed to register.
 	 */
 	public int registerIcon(String path);
 
 	/**
-	 * Mac only
+	 * Mac Finder Sync only
+	 *
+	 * Register an overlay icon with label and id
+	 *
+	 * @param path The path of the overlay icon to register
+	 * @param label The label to show when icons are unavailable
+	 * @param path The unique id identifying this icon
+	 */
+	public void registerIconWithId(String path, String label, int id);
+
+	/**
+	 * Linux only
+	 * Deprecated for Mac as of 1.2
 	 *
 	 * Removes all file icon overlays
 	 */
 	public void removeAllFileIcons();
 
 	/**
-	 * Mac only
+	 * Linux only
+	 * Deprecated for Mac as of 1.2
 	 *
 	 * Removes file icon overlay
 	 *
-	 * @param file path to remove the file icon overlay
+	 * @param path The file path to remove the overlay
 	 */
 	public void removeFileIcon(String path);
 
 	/**
-	 * Mac only
+	 * Linux only
+	 * Deprecated for Mac as of 1.2
 	 *
 	 * Removes file icon overlays
 	 *
-	 * @param file paths to remove file icon overlays
+	 * @param paths The file paths to remove file icon overlays
 	 */
 	public void removeFileIcons(String[] paths);
 
 	/**
-	 * Mac only
+	 * Linux only
+	 * Deprecated for Mac as of 1.2
 	 *
 	 * Set file icon overlay
 	 *
-	 * @param file path to set file icon overlays
+	 * @param path The file path to set file icon overlays
 	 *
-	 * @param id of file icon overlay. Value of -1 will remove the overlay
-	 * (same as calling removeFileIcon).
+	 * @param iconId The id of file icon overlay. Value of -1 will remove the
+	 * overlay (same as calling removeFileIcon).
 	 */
 	public void setFileIcon(String path, int iconId);
 
 	/**
-	 * Mac only
+	 * Linux only
+	 * Deprecated for Mac as of 1.2
 	 *
 	 * Set file icon overlays
 	 *
-	 * @param map containing paths and file icon overlay ids
+	 * @param fileIconsMap The map containing the paths and associated file
+	 * icon overlay ids
 	 */
 	public void setFileIcons(Map<String, Integer> fileIconsMap);
 
@@ -93,7 +120,7 @@ public interface FileIconControl extends FileIconControlCallback {
 	 *
 	 * Unregister an overlay icon
 	 *
-	 * @param overlay icon id
+	 * @param id The id of the icon to unregister
 	 */
 	public void unregisterIcon(int id);
 

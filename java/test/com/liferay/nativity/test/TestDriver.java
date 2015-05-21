@@ -220,14 +220,14 @@ public class TestDriver {
 		}
 	}
 
+	private static Logger _logger = LoggerFactory.getLogger(
+		TestDriver.class.getName());
+
 	private static int _fileIconId = -1;
 	private static String _fileIconPath = "/Users/liferay/Desktop/test.icns";
 	private static boolean _list = false;
-	private static Logger _logger = LoggerFactory.getLogger(
-		TestDriver.class.getName());
-	private static ObjectMapper _objectMapper =
-		new ObjectMapper().configure(
-			JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+	private static ObjectMapper _objectMapper = new ObjectMapper().configure(
+		JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 	private static String _testFile =
 		"C:/Users/liferay/Documents/liferay-sync/Sync.pptx";
 	private static String _testFolder =

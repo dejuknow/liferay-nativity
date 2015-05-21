@@ -1,10 +1,22 @@
+build
 build.*.properties
-
-.idea/
-*.bundle/
-xcuserdata/
 dist
 tmp
+
+.DS_Store
+.idea/
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+!default.mode1v3
+!default.mode2v3
+!default.pbxuser
+!default.perspectivev3
+DerivedData
+profile
+xcuserdata
 
 java/bin
 java/classes
@@ -17,7 +29,7 @@ windows/LiferayNativityShellExtensions/Release
 windows/LiferayNativityShellExtensions/Debug
 windows/LiferayNativityShellExtensions/LiferayNativityOverlays/Debug
 windows/LiferayNativityShellExtensions/LiferayNativityOverlays/Release
-windows/LiferayNativityShellExtensions/LiferayNativityOverlays/OverlayContants.h
+windows/LiferayNativityShellExtensions/LiferayNativityOverlays/OverlayConstants.h
 windows/LiferayNativityShellExtensions/LiferayNativityContextMenus/Release
 windows/LiferayNativityShellExtensions/LiferayNativityContextMenus/Debug
 windows/LiferayNativityShellExtensions/LiferayNativityContextMenus/ContextMenuConstants.h

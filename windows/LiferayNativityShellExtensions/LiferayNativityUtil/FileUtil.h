@@ -19,22 +19,25 @@
 
 #pragma warning (disable : 4251)
 
+#include "RegistryUtil.h"
+#include "StringUtil.h"
+#include "UtilConstants.h"
+#include "json/json.h"
+
 #include <string>
 #include <vector>
 
 class __declspec(dllexport) FileUtil
 {
-public:
-	FileUtil();
+	public:
+		FileUtil();
+		~FileUtil();
 
-	~FileUtil();
+		static bool IsChildFile(const wchar_t*, const wchar_t*);
 
-	static bool IsChildFile(const wchar_t*, std::vector<std::wstring>*);
-	static bool IsChildFile(const wchar_t*, const wchar_t*);
-	static bool IsChildFileOfRoot(std::vector<std::wstring>*);
-	static bool IsChildFileOfRoot(const wchar_t*);
+		static bool IsFileFiltered(const wchar_t*);
 
-private:	
+	private:
 };
 
 #endif

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,10 +17,8 @@ package com.liferay.nativity.control.unix;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.liferay.nativity.Constants;
 import com.liferay.nativity.control.NativityControl;
 import com.liferay.nativity.control.NativityMessage;
-import com.liferay.nativity.listeners.SocketCloseListener;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -29,6 +27,8 @@ import java.io.InputStreamReader;
 
 import java.net.Socket;
 import java.net.SocketException;
+
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +109,15 @@ public abstract class UnixNativityControlBaseImpl extends NativityControl {
 	}
 
 	@Override
+	public Set<String> getAllObservedFolders() {
+		return null;
+	}
+
+	@Override
+	public void refreshFiles(String[] paths) {
+	}
+
+	@Override
 	public String sendMessage(NativityMessage message) {
 		if (!_connected) {
 			_logger.debug("LiferayNativity is not connected");
@@ -137,9 +146,7 @@ public abstract class UnixNativityControlBaseImpl extends NativityControl {
 			if (reply == null) {
 				_commandSocket.close();
 
-				for (SocketCloseListener listener : socketCloseListeners) {
-					listener.onSocketClose();
-				}
+				fireSocketCloseListeners();
 			}
 
 			return reply;
@@ -147,20 +154,10 @@ public abstract class UnixNativityControlBaseImpl extends NativityControl {
 		catch (IOException e) {
 			_logger.error(e.getMessage(), e);
 
-			for (SocketCloseListener listener : socketCloseListeners) {
-				listener.onSocketClose();
-			}
+			fireSocketCloseListeners();
 
 			return "";
 		}
-	}
-
-	@Override
-	public void setFilterFolder(String folder) {
-		NativityMessage message = new NativityMessage(
-			Constants.SET_FILTER_PATH, folder);
-
-		sendMessage(message);
 	}
 
 	@Override
@@ -201,9 +198,7 @@ public abstract class UnixNativityControlBaseImpl extends NativityControl {
 				if (data == null) {
 					disconnect();
 
-					for (SocketCloseListener listener : socketCloseListeners) {
-						listener.onSocketClose();
-					}
+					fireSocketCloseListeners();
 
 					break;
 				}
@@ -240,22 +235,20 @@ public abstract class UnixNativityControlBaseImpl extends NativityControl {
 
 				disconnect();
 
-				for (SocketCloseListener listener : socketCloseListeners) {
-					listener.onSocketClose();
-				}
+				fireSocketCloseListeners();
 			}
 		}
 	}
 
 	private static final String _RETURN_NEW_LINE = "\r\n";
 
-	private static int _callbackSocketPort = 33002;
-	private static int _commandSocketPort = 33001;
 	private static Logger _logger = LoggerFactory.getLogger(
 		UnixNativityControlBaseImpl.class.getName());
-	private static ObjectMapper _objectMapper =
-		new ObjectMapper().configure(
-			JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+
+	private static int _callbackSocketPort = 33002;
+	private static int _commandSocketPort = 33001;
+	private static ObjectMapper _objectMapper = new ObjectMapper().configure(
+		JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
 	private BufferedReader _callbackBufferedReader;
 	private DataOutputStream _callbackOutputStream;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,39 +14,96 @@
 
 package com.liferay.nativity.control.win;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.liferay.nativity.Constants;
 import com.liferay.nativity.control.NativityControl;
+import com.liferay.nativity.control.NativityMessage;
 import com.liferay.nativity.util.win.RegistryUtil;
 
-import java.util.concurrent.ExecutorService;
+import java.io.IOException;
+
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+
+import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * @author Gail Hernandez
  * @author Dennis Ju
  */
 public class WindowsNativityControlImpl extends NativityControl {
 
 	@Override
 	public boolean connect() {
-		_logger.debug("Connecting...");
+		if (_connected) {
+			return true;
+		}
 
 		boolean loaded = WindowsNativityUtil.load();
 
-		_logger.debug("Loaded {}", loaded);
+		if (!loaded) {
+			_logger.debug("WindowsNativityUtil failed to load");
 
-		_receive = new WindowsReceiveSocket(this);
+			return false;
+		}
 
-		_receiveExecutor.execute(_receive);
+		if (_serverSocket == null) {
+			try {
+				_serverSocket = new ServerSocket(_port);
+
+				_connected = true;
+			}
+			catch (IOException ioe) {
+				_logger.error(ioe.getMessage(), ioe);
+
+				return false;
+			}
+		}
+
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				while (_connected) {
+					handleConnection();
+				}
+			}
+		};
+
+		_executor.execute(runnable);
 
 		return true;
 	}
 
 	@Override
 	public boolean disconnect() {
+		if (!_connected) {
+			return true;
+		}
+
+		try {
+			_serverSocket.close();
+		}
+		catch (IOException e) {
+			_logger.error(e.getMessage(), e);
+		}
+
+		_connected = false;
+
 		return true;
+	}
+
+	@Override
+	public Set<String> getAllObservedFolders() {
+		return null;
 	}
 
 	@Override
@@ -56,64 +113,97 @@ public class WindowsNativityControlImpl extends NativityControl {
 
 	@Override
 	public boolean loaded() {
-		return WindowsNativityUtil.load();
+		return true;
 	}
 
 	@Override
 	public void refreshFiles(String[] paths) {
-		if (paths == null) {
+		if ((paths == null) || (paths.length == 0)) {
 			return;
 		}
 
-		if (!WindowsNativityUtil.load()) {
+		if (!WindowsNativityUtil.loaded()) {
 			return;
 		}
 
 		try {
 			for (String path : paths) {
-				String temp = path.replace("/", "\\");
-
-				WindowsNativityUtil.updateExplorer(temp);
+				WindowsNativityUtil.updateExplorer(path);
 			}
 		}
-		catch (UnsatisfiedLinkError e) {
-			_logger.error(e.getMessage(), e);
+		catch (UnsatisfiedLinkError ule) {
+			_logger.error(ule.getMessage(), ule);
 		}
+	}
+
+	@Override
+	public String sendMessage(NativityMessage nativityMessage) {
+		return "";
 	}
 
 	@Override
 	public void setFilterFolder(String folder) {
-		String temp = folder.replace("/", "\\");
+		setFilterFolders(new String[] { folder });
+	}
 
-		RegistryUtil.writeRegistry(
-			Constants.NATIVITY_REGISTRY_KEY,
-			Constants.FILTER_FOLDER_REGISTRY_NAME, temp);
+	@Override
+	public void setFilterFolders(String[] folders) {
+		try {
+			String foldersJson = _objectMapper.writeValueAsString(folders);
+
+			RegistryUtil.writeRegistry(
+				Constants.NATIVITY_REGISTRY_KEY,
+				Constants.FILTER_FOLDERS_REGISTRY_NAME, foldersJson);
+		}
+		catch (JsonProcessingException jpe) {
+			_logger.error(jpe.getMessage(), jpe);
+		}
 	}
 
 	@Override
 	public void setSystemFolder(String folder) {
-		if (!WindowsNativityUtil.load()) {
+		if (!WindowsNativityUtil.loaded()) {
 			return;
 		}
 
 		try {
 			WindowsNativityUtil.setSystemFolder(folder);
 		}
-		catch (UnsatisfiedLinkError e) {
-			_logger.error(e.getMessage(), e);
+		catch (UnsatisfiedLinkError ule) {
+			_logger.error(ule.getMessage(), ule);
 		}
 	}
 
 	@Override
 	public boolean unload() throws Exception {
-		return false;
+		return true;
+	}
+
+	protected void handleConnection() {
+		try {
+			Socket clientSocket = _serverSocket.accept();
+
+			_executor.execute(new MessageProcessor(clientSocket, this));
+		}
+		catch (SocketException se) {
+			fireSocketCloseListeners();
+		}
+		catch (IOException e) {
+			_logger.error(e.getMessage(), e);
+
+			fireSocketCloseListeners();
+		}
 	}
 
 	private static Logger _logger = LoggerFactory.getLogger(
 		WindowsNativityControlImpl.class.getName());
 
-	private WindowsReceiveSocket _receive;
-	private ExecutorService _receiveExecutor =
-		Executors.newSingleThreadExecutor();
+	private static ObjectMapper _objectMapper = new ObjectMapper().configure(
+		JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+	private static int _port = 33001;
+
+	private boolean _connected = false;
+	private Executor _executor = Executors.newCachedThreadPool();
+	private ServerSocket _serverSocket;
 
 }

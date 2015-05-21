@@ -17,22 +17,20 @@
 
 #include "stdafx.h"
 
-class __declspec(dllexport) ContextMenuAction 
+class __declspec(dllexport) ContextMenuAction
 {
-public:
+	public:
+		std::wstring* GetUuid();
 
-	std::wstring* GetUuid();
-	
-	std::vector<std::wstring>* GetFiles();
-	
-	void SetUuid(std::wstring*);
+		std::vector<std::wstring>* GetFiles();
 
-	void SetFiles(std::vector<std::wstring>*);
+		void SetFiles(std::vector<std::wstring>*);
 
-private:
-	
-	std::wstring* _uuid;
-	std::vector<std::wstring>* _files;
+		void SetUuid(std::wstring*);
+
+	private:
+		std::vector<std::wstring>* _files;
+		std::wstring* _uuid;
 };
 
 #endif

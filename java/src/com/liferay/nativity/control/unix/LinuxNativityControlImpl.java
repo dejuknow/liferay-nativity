@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,9 @@
  */
 
 package com.liferay.nativity.control.unix;
+
+import com.liferay.nativity.Constants;
+import com.liferay.nativity.control.NativityMessage;
 
 import java.io.File;
 
@@ -43,7 +46,20 @@ public class LinuxNativityControlImpl extends UnixNativityControlBaseImpl {
 	}
 
 	@Override
-	public void refreshFiles(String[] paths) {
+	public void setFilterFolder(String folder) {
+		NativityMessage message = new NativityMessage(
+			Constants.SET_FILTER_PATH, folder);
+
+		sendMessage(message);
+	}
+
+	@Override
+	public void setFilterFolders(String[] folders) {
+		if (folders.length == 0) {
+			return;
+		}
+
+		setFilterFolder(folders[0]);
 	}
 
 	@Override

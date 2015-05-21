@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -50,24 +50,18 @@ public class MessageProcessor implements Runnable {
 		try {
 			StringBuilder sb = new StringBuilder();
 
-			boolean end = false;
+			while (true) {
+				int character = _inputStreamReader.read();
 
-			while (!end) {
-				int item = _inputStreamReader.read();
-
-				if (item == -1) {
-					end = true;
+				if (character == -1) {
+					break;
 				}
 				else {
-					char letter = (char)item;
-					sb.append(letter);
+					sb.append((char)character);
 				}
 			}
 
 			String message = sb.toString();
-
-			message = message.replace("\\", "/");
-			message = message.replace("/\"", "\\\"");
 
 			if (message.isEmpty()) {
 				_returnEmpty();
@@ -82,16 +76,6 @@ public class MessageProcessor implements Runnable {
 	}
 
 	private void _handle(String receivedMessage) throws IOException {
-		if (receivedMessage.charAt(0) != '{')
-		{
-			_logger.error("Invalid message {}", receivedMessage);
-			return;
-		}
-
-		if (receivedMessage.endsWith(":\\\"]}")) {
-			receivedMessage = receivedMessage.replace(":\\\"]}", "\"]}");
-		}
-
 		try {
 			NativityMessage message = _objectMapper.readValue(
 				receivedMessage, NativityMessage.class);
@@ -107,7 +91,7 @@ public class MessageProcessor implements Runnable {
 				_outputStreamWriter.write("\0");
 			}
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			_logger.error(e.getMessage(), e);
 		}
 		finally {
@@ -144,9 +128,9 @@ public class MessageProcessor implements Runnable {
 
 	private static Logger _logger = LoggerFactory.getLogger(
 		MessageProcessor.class.getName());
-	private static ObjectMapper _objectMapper =
-		new ObjectMapper().configure(
-			JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+
+	private static ObjectMapper _objectMapper = new ObjectMapper().configure(
+		JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
 	private Socket _clientSocket;
 	private InputStreamReader _inputStreamReader;

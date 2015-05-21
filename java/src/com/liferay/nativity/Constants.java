@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -23,19 +23,22 @@ public class Constants {
 
 	public static final String ENABLE_FILE_ICONS = "enableFileIcons";
 
+	public static final String ENABLE_FILE_ICONS_WITH_CALLBACK =
+		"enableFileIconsWithCallback";
+
 	public static final String ENABLE_OVERLAY_REGISTRY_NAME = "EnableOverlay";
+
+	public static final String END_OBSERVING_FOLDER = "endObservingFolder";
 
 	public static final String FILES = "files";
 
-	public static final String FILTER_FOLDER_REGISTRY_NAME = "FilterFolder";
+	public static final String FILTER_FOLDERS_REGISTRY_NAME = "FilterFolders";
 
 	public static final String FIRE_CONTEXT_MENU_ACTION = "contextMenuAction";
 
 	public static final String GET_CONTEXT_MENU_ITEMS = "getContextMenuList";
 
 	public static final String GET_FILE_ICON_ID = "getFileIconId";
-
-	public static final String ID = "id";
 
 	public static final String MENU_INDEX = "menuIndex";
 
@@ -50,18 +53,28 @@ public class Constants {
 
 	public static final String REGISTER_ICON = "registerIcon";
 
+	public static final String REGISTER_ICON_WITH_ID = "registerIconWithId";
+
 	public static final String REMOVE_ALL_FILE_ICONS = "removeAllFileIcons";
 
 	public static final String REMOVE_FILE_ICONS = "removeFileIcons";
+
+	public static final String REPAINT_ALL_ICONS = "repaintAllIcons";
 
 	public static final String SET_FILE_ICONS = "setFileIcons";
 
 	public static final String SET_FILTER_PATH = "setFilterPath";
 
+	public static final String SET_FILTER_PATHS = "setFilterPaths";
+
 	public static final String SET_SYSTEM_FOLDER = "setSystemFolder";
+
+	public static final String START_OBSERVING_FOLDER = "startObservingFolder";
 
 	public static final String UNREGISTER_ICON = "unregisterIcon";
 
 	public static final String UPDATE_FILE_ICON = "updateFileIcon";
+
+	public static final String UUID = "uuid";
 
 }
